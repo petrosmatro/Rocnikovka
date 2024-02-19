@@ -85,6 +85,7 @@ if(isset($_POST['createTL'])){
         </li>
         <li><a href="myTemplates.php">My Templates</a></li>
         <li><a href="tierlists.php">Tier Lists</a></li>
+        <li><a href="categories.php">Categories</a></li>
         <li><a href="main.php">Main Page</a></li>
         <li style="float:left"><img src="logoprostranku.png" alt="" width="150" height="70"></li>
     </ul>

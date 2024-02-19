@@ -158,7 +158,7 @@ if(isset($_POST['save'])){
 
     <div class="template-container">
         <form action="" method="post" enctype="multipart/form-data">
-            <div class="items-container">
+            <div class="items-container" id="screenshot">
                 <input type="text" name="tempName" placeholder="Name your template">
                 <select name="theme" style="width: 50%; margin-bottom: 15px;">
                     <option value="music">Music</option>
@@ -185,38 +185,34 @@ if(isset($_POST['save'])){
     </div>
 
     <script>
-        function previewImages(){
+        function previewImages() {
             var input = document.getElementById('imageInput');
             var container = document.getElementById('imageContainer');
 
-        
-
             for (var i = 0; i < input.files.length; i++) {
-                var file = input.files[i];
-                var reader = new FileReader();
+                (function (file) {
+                    var reader = new FileReader();
 
-                reader.onloadend = function () {
-                    var img = document.createElement('img');
-                    img.src = reader.result;
-                    img.classList.add('image-preview');
-                    
-                    img.addEventListener('click', function() {
-                        this.remove();
-                        updateFileInfo();
-                    });
-                    container.appendChild(img);
-                };
+                    reader.onloadend = function () {
+                        var img = document.createElement('img');
+                        img.src = reader.result;
+                        img.classList.add('image-preview');
 
-                if (file) {
-                    reader.readAsDataURL(file);
-                }
+                        img.addEventListener('click', function () {
+                            this.remove();
+                        });
+                        container.appendChild(img);
+                    };
+
+                    if (file) {
+                        reader.readAsDataURL(file);
+                    }
+                })(input.files[i]);
             }
-
-    
         }
 
         document.getElementById('downloadbtn').addEventListener('click', function(){
-            html2canvas(document.body).then(function(canvas) {
+            html2canvas(document.getElementById('screenshot')).then(function(canvas) {
         
                 var dataUrl = canvas.toDataURL('image/jpeg');
                 

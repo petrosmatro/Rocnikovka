@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tabulka s výsledky</title>
+    <style>
+        /* styles.css */
+body {
+    font-family: Arial, sans-serif;
+}
+
+.table-container {
+    width: 80%;
+    height: 400px; /* Nastavte požadovanou výšku */
+    margin: 20px auto;
+    overflow: auto;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+    border: 1px solid #ddd;
+}
+
+.results-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.results-table th, .results-table td {
+    padding: 10px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+.results-table th {
+    background-color: #f4f4f4;
+    font-weight: bold;
+    position: sticky;
+    top: 0; /* Fixuje hlavičku tabulky při rolování */
+}
+
+.results-table tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+.results-table tr:hover {
+    background-color: #f1f1f1;
+}
+
+    </style>
+</head>
+<body>
+    <div class="table-container">
+        <table class="results-table">
+            <thead>
+                <tr>
+                    <th>Rank</th>
+                    <th>Uživatelské jméno</th>
+                    <th>Přesnost</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>1</td>
+                    <td>Uživatel1</td>
+                    <td>95%</td>
+                </tr>
+                <tr>
+                    <td>2</td>
+                    <td>Uživatel2</td>
+                    <td>93%</td>
+                </tr>
+                <tr>
+                    <td>3</td>
+                    <td>Uživatel3</td>
+                    <td>90%</td>
+                </tr>
+                <tr><td>3</td>
+                    <td>Uživatel3</td>
+                    <td>90%</td></tr>
+                <tr><td>3</td>
+                    <td>Uživatel3</td>
+                    <td>90%</td></tr>
+                <tr><td>3</td>
+                    <td>Uživatel3</td>
+                    <td>90%</td></tr>
+                <tr><td>3</td>
+                    <td>Uživatel3</td>
+                    <td>90%</td></tr>
+                <tr><td>3</td>
+                    <td>Uživatel3</td>
+                    <td>90%</td></tr>
+                <tr><td>3</td>
+                    <td>Uživatel3</td>
+                    <td>90%</td></tr>
+                <tr><td>3</td>
+                    <td>Uživatel3</td>
+                    <td>90%</td></tr>
+                <tr><td>3</td>
+                    <td>Uživatel3</td>
+                    <td>90%</td></tr>
+                <tr><td>3</td>
+                    <td>Uživatel3</td>
+                    <td>90%</td></tr>
+                <tr><td>3</td>
+                    <td>Uživatel3</td>
+                    <td>90%</td></tr>
+                <tr><td>3</td>
+                    <td>Uživatel3</td>
+                    <td>90%</td></tr>
+                <tr><td>3</td>
+                    <td>Uživatel3</td>
+                    <td>90%</td></tr>
+                <!-- Přidejte další řádky podle potřeby -->
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>

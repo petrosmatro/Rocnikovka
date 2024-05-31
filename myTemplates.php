@@ -19,6 +19,14 @@
             margin: 0;
             font-family: Arial, sans-serif;
         }
+
+        body.dark-mode{
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: black;
+            color: white;
+        }
+
         .navbar{
             list-style-type: none;
             overflow: hidden;
@@ -165,6 +173,27 @@
         function toggleMenu(){
             subMenu.classList.toggle('open-menu');
         }
+
+        document.addEventListener('DOMContentLoaded', (event) => {
+            const toggle = document.getElementById('darkModeToggle');
+
+            // Zkontrolovat a aplikovat uložené nastavení
+            if (localStorage.getItem('darkMode') === 'enabled') {
+                document.body.classList.add('dark-mode');
+                toggle.checked = true;
+            }
+
+            // Při změně přepínače změnit režim
+            toggle.addEventListener('change', () => {
+                if (toggle.checked) {
+                    document.body.classList.add('dark-mode');
+                    localStorage.setItem('darkMode', 'enabled');
+                } else {
+                    document.body.classList.remove('dark-mode');
+                    localStorage.setItem('darkMode', 'disabled');
+                }
+            });
+        });
     </script>
 </body>
 </html>

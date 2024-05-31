@@ -48,6 +48,14 @@ if(isset($_POST['saveChanges'])){
         body{
             margin: 0;
             font-family: Arial, sans-serif;
+            transition: background-color 0.5s ease, color 0.5s ease;
+        }
+
+        body.dark-mode{
+            margin-top: 0;
+            font-family: Arial, sans-serif;
+            background-color: black;
+            color: white;
         }
 
         .navbar{
@@ -117,6 +125,11 @@ if(isset($_POST['saveChanges'])){
             margin-right: 15px;
         }
 
+        .navbar a:hover {
+            background-color: #333333;
+            color: #ffffff;
+        }
+
         .sub-menu hr{
             border: 0;
             height: 1px;
@@ -148,11 +161,15 @@ if(isset($_POST['saveChanges'])){
             font-weight: 600;
         }
 
-        .edit-account form img{
+        .edit-account img{
             width: 60px;
             height: 60px;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
             border-radius: 50%;
-            border: 2px solid gray;
+            border: 2px solid green;
+            
         }
 
         .edit-account{
@@ -164,9 +181,121 @@ if(isset($_POST['saveChanges'])){
             border-radius: 5px;
         }
 
-        .edit-account form{
-            align-self: center;
+        .edit-account input[type="text"],
+        .edit-account input[type="file"] {
+            width: 100%;
+            padding: 10px;
+            margin: 5px 0 20px 0;
+            display: inline-block;
+            border: 1px solid #ccc;
+            box-sizing: border-box;
+            border-radius: 5px;
         }
+
+        .edit-account button{
+            background-color: green;
+            color: white;
+            position: relative;
+            padding: 14px 20px;
+            margin: 8px 0;
+            border: none;
+            cursor: pointer;
+            width: 100%;
+            border-radius: 50px;
+            overflow: hidden;
+        }
+
+        .edit-account button::after {
+            content: '';
+            left: 0;
+            bottom: 0px; 
+            width: 100%; 
+            height: 2px; 
+            background-color: white; 
+            position: absolute;  
+            transform: scaleX(0); 
+            transition: transform 0.7s ease;
+        }
+
+        
+
+        .edit-account button:hover::after{
+            transform: scaleX(1.0); 
+        }
+
+        /* Základní styl pro switch */
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 34px;
+}
+
+/* Skrytí standardního checkboxu */
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+/* Styl pro slider */
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: .4s;
+    border-radius: 34px;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 26px;
+    width: 26px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+}
+
+/* Styl pro přepnutí */
+input:checked + .slider {
+    background-color: #2196F3;
+}
+
+input:checked + .slider:before {
+    transform: translateX(26px);
+}
+
+/* Přidání stínu při zaměření */
+input:focus + .slider {
+    box-shadow: 0 0 1px #2196F3;
+}
+
+.slider-container{
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+}
+
+body.dark-mode .edit-account{
+    background-color: #1a1a1a;
+    border-color: #333333;
+}
+
+body.dark-mode .navbar{
+    background-color: #1a1a1a;
+}
+
+
+
     </style>
 </head>
 <body>
@@ -213,12 +342,22 @@ if(isset($_POST['saveChanges'])){
         <form action="" method="post" enctype="multipart/form-data">
             <?php echo "<img src='profileimgs/$image' id='image'>"; ?>
             <input type="hidden" name="id" value="<?php echo $user['id_user']?>">
+            <label for="fileImg">Profile Image</label>
             <input type="file" name="fileImg" id="fileImg" accept=".jpg, .jpeg, .png">
 
             <label for="username">Username:</label>
             <input type="text" name="editUsername" value="<?php echo $username; ?>">
+            <div class="slider-container">
+                <span>Dark Mode</span>
+                <label class="switch">
+                    <input type="checkbox" id="darkModeToggle">
+                    <span class="slider"></span>
+                </label>
+            </div>
+            
             <button type="submit" name="saveChanges">Save Changes</button>
         </form>
+        
     </div>
     
 
@@ -232,6 +371,28 @@ if(isset($_POST['saveChanges'])){
         document.getElementById('fileImg').onchange = function(){
             document.getElementById('image').src = URL.createObjectURL(fileImg.files[0]);
         }
+
+        document.addEventListener('DOMContentLoaded', (event) => {
+            const toggle = document.getElementById('darkModeToggle');
+
+            // Zkontrolovat a aplikovat uložené nastavení
+            if (localStorage.getItem('darkMode') === 'enabled') {
+                document.body.classList.add('dark-mode');
+                toggle.checked = true;
+            }
+
+            // Při změně přepínače změnit režim
+            toggle.addEventListener('change', () => {
+                if (toggle.checked) {
+                    document.body.classList.add('dark-mode');
+                    localStorage.setItem('darkMode', 'enabled');
+                } else {
+                    document.body.classList.remove('dark-mode');
+                    localStorage.setItem('darkMode', 'disabled');
+                }
+            });
+        });
+
     </script>
 </body>
 </html>

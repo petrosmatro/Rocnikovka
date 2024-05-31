@@ -14,10 +14,8 @@
     $id_tier = $_GET['id'];
     $sql2 = "SELECT * FROM images WHERE tierlist = $id_tier";
     $query2 = mysqli_query($conn, $sql2);
-    $resultArray = [];
-    while ($row = mysqli_fetch_assoc($query2)) {
-        $resultArray[] = $row;
-    }
+
+    $query3 = mysqli_query($conn, "SELECT * FROM tier_rows WHERE id_tier = $id_tier");
 
 
 
@@ -37,6 +35,14 @@
             margin: 0;
             font-family: Arial, sans-serif;
         }
+
+        body.dark-mode{
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: black;
+            color: white;
+        }
+
         .navbar{
             list-style-type: none;
             overflow: hidden;
@@ -137,14 +143,19 @@
 
         .tier-container{
             margin-top: 10%;
-        
+            width: 100%;
             margin-bottom: 20%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
         }
 
         .items-container{
             display: flex;
             flex-direction: column;
             align-items: center;
+            width: 850px;
 
 
         }
@@ -156,10 +167,65 @@
         }
         
         .images-container img{
-            height: 100px;
-            width: 100px;
+            height: 80px;
+            width: 80px;
         }
 
+        .tier {
+            display: flex;
+            align-items: stretch;
+            width: 100%;
+            min-height: 80px;
+            max-height: 240px;
+            position: relative;
+        }
+
+        .tier-name {
+            background-color: #f0f0f0;
+            width: 30%;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1;
+        }
+
+        .tier-content {
+            background-color: black;
+            width: 100%;
+            margin-left: -20px;
+            display: flex;
+            flex-wrap: wrap;
+            
+        }
+
+        .tier-desc{
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+
+        .tier-content img{
+            height: 80px;
+            width: 80px;
+        }
+
+        .download-btn{
+            padding: 10px;
+            background-color: red;
+            color: white;
+            border: none;
+            border-radius: 20px;
+            margin-top: 50px;
+        }
+
+        .tiers-container{
+            width: 90%;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
 
 
         
@@ -207,33 +273,130 @@
     </div>
 
     <div class="tier-container">
+        <div class="tier-desc">
+            <h1>Tierlist Using</h1>
+            <p>Here you can finally rank things to tiers in the way that you want.</p>
+            <p>Feel free to make your own opinion.</p>
+        </div>
         <?php foreach ($query as $q){?>
             <div class="items-container">
                 <h2><?php echo $q['nazev']?></h2>
-                <h4><?php echo $q['tema']?></h4>
-                <img src="TierList.jpg" alt="" width="768" height="432">
+                <div class="tiers-container">
+                    <?php foreach ($query3 as $q3){?>
+                        <div class="tier">
+                            <div style="background-color: <?php echo $q3['color'];?>;" class="tier-name"><span><?php echo $q3['row_name'];?></span></div>
+                            <div class="tier-content"></div>
+                        </div>
+                    <?php }?>
+                </div>
+                
                 
                     <div class="images-container">
-                        <?php foreach ($resultArray as $q2): ?>
-                            <img src="data:image/jpeg;base64,<?php echo base64_encode($q2['obrazek']); ?>" alt="Image">
-                        <?php endforeach; ?>
+                        <?php foreach ($query2 as $q2){ ?>
+                            <img src="uploads/<?php echo $q2['nazev'];?>" alt="" id="img<?php echo $q2['id_img'];?>" draggable="true" class="draggable">
+                        <?php } ?>
                     </div>
                 
             </div>
         <?php } ?>
         
+        <button class="download-btn">Download Tierlist as Image</button>
 
             
     </div>
 
     <script>
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const draggables = document.querySelectorAll('.draggable');
+            const dropZones = document.querySelectorAll('.tier-content');
+
+            draggables.forEach(draggable => {
+        draggable.addEventListener('dragstart', dragStart);
+        draggable.addEventListener('dragend', dragEnd);
+    });
+
+    dropZones.forEach(zone => {
+        zone.addEventListener('dragover', dragOver);
+        zone.addEventListener('drop', drop);
+    });
+
+    function dragStart(event) {
+        event.dataTransfer.setData('text/plain', event.target.id);
+        event.target.classList.add('dragging');
+        setTimeout(() => {
+            event.target.style.visibility = 'hidden';
+        }, 0);
+    }
+
+    function dragEnd(event) {
+        event.target.style.visibility = 'visible';
+        event.target.classList.remove('dragging');
+    }
+
+    function dragOver(event) {
+        event.preventDefault();
+        const dragging = document.querySelector('.dragging');
+        const afterElement = getDragAfterElement(event.currentTarget, event.clientY);
+
+        if (afterElement == null) {
+            event.currentTarget.appendChild(dragging);
+        } else {
+            const bounding = afterElement.getBoundingClientRect();
+            const offset = event.clientY - bounding.top - bounding.height / 2;
+            if (offset > 0) {
+                event.currentTarget.insertBefore(dragging, afterElement.nextElementSibling);
+            } else {
+                event.currentTarget.insertBefore(dragging, afterElement);
+            }
+        }
+    }
+
+    function drop(event) {
+        event.preventDefault();
+        const id = event.dataTransfer.getData('text');
+        const draggable = document.getElementById(id);
+        draggable.style.visibility = 'visible';
+        draggable.classList.remove('dragging');
+    }
+
+    function getDragAfterElement(container, y) {
+        const draggableElements = [...container.querySelectorAll('.draggable:not(.dragging)')];
+
+        return draggableElements.reduce((closest, child) => {
+            const box = child.getBoundingClientRect();
+            const offset = y - box.top - box.height;
+
+            if (offset < 0 && offset > closest.offset) {
+                return { offset: offset, element: child };
+            } else {
+                return closest;
+            }
+        }, { offset: Number.NEGATIVE_INFINITY }).element;
+    }
+        });
+
+
+
+
+        
         let subMenu = document.getElementById('subMenu');
 
         function toggleMenu(){
             subMenu.classList.toggle('open-menu');
         }
 
-        
+        document.addEventListener('DOMContentLoaded', (event) => {
+            const toggle = document.getElementById('darkModeToggle');
+
+            // Zkontrolovat a aplikovat uložené nastavení
+            if (localStorage.getItem('darkMode') === 'enabled') {
+                document.body.classList.add('dark-mode');
+                toggle.checked = true;
+            }
+
+            
+        });
     </script>
 </body>
 </html>

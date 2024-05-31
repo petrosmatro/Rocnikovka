@@ -1,41 +1,104 @@
 <?php
+
+
 $conn = mysqli_connect('localhost', 'root', '', 'mytierlist');
 session_start();
 
-if(isset($_POST['save'])){
-    $tempName = mysqli_real_escape_string($conn, $_POST['tempName']);
+if (!isset($_SESSION['session_id'])) {
+    $_SESSION['session_id'] = session_id();
+}
+
+if (isset($_POST['upload'])) {
+    $title = $_POST['tempName'];
     $theme = $_POST['theme'];
-    $author = $_SESSION['username'];
+    $author = $_SESSION['id'];
+    $session_id = $_SESSION['session_id'];
 
-    $insert = "INSERT INTO tierlists(nazev, tema, autor) VALUES('$tempName', (SELECT categories.id_cat FROM categories WHERE nazevCat = '$theme'), '$author')";
-    mysqli_query($conn, $insert);
+    // Zahájit transakci
+    $conn->begin_transaction();
 
-    $post_id = $conn -> insert_id;
-    if (!empty($_FILES["images"]["name"][0])){
-        foreach($_FILES["images"]["name"] as $key => $imageName) {
-            $uniqueName = uniqid() . "_" . $imageName;
-            $imageTmp = $_FILES["images"]["tmp_name"][$key];
-            $imageContent = file_get_contents($imageTmp);
-    
-            $insertImages = "INSERT INTO images(nazev, obrazek, tierlist) VALUES(?, ?, ?)";
-            $imagestmt = $conn -> prepare($insertImages);
-            $imagestmt -> bind_param("ssi", $uniqueName, $imageContent, $post_id);
-            $imagestmt -> execute();
-            $imagestmt -> close();
+    try {
+
+        mysqli_query($conn, "INSERT INTO tierlists (nazev, tema, autor) VALUES ('$title', (SELECT categories.id_cat FROM categories WHERE nazevCat = '$theme'), $author)");
+        
+        $post_id = $conn->insert_id;
+
+        $tiers = $_POST['tiers'];
+        foreach ($tiers as $tier){
+            $tier_name = $tier['tier_name'];
+            $color = $tier['color'];
+
+            mysqli_query($conn, "INSERT INTO tier_rows (row_name, color, id_tier) VALUES ('$tier_name', '$color', $post_id)");
         }
-    }
+
+        if(!empty($_FILES["cover"]["name"])){
+            $src = $_FILES["cover"]["tmp_name"];
+            $imageName = uniqid() . $_FILES["cover"]["name"];
+            $target = "coverimgs/" . $imageName;
     
-    header('location:tierlists.php');
+            
+    
+            move_uploaded_file($src, $target);
+            $insertCover = "UPDATE tierlists SET cover = '$imageName' WHERE id_tier = '$post_id'";
+            mysqli_query($conn, $insertCover);
+            
+    
+            
+            
+        }
+
+        // Přiřazení obrázků z dočasné tabulky k příspěvku
+        $stmt = $conn->prepare("INSERT INTO images (nazev, tierlist) SELECT img_name, ? FROM temp_images WHERE session_id = ?");
+        $stmt->bind_param("is", $post_id, $session_id);
+        $stmt->execute();
+        $stmt->close();
+
+        // Smazání záznamů z dočasné tabulky
+        $stmt = $conn->prepare("DELETE FROM temp_images WHERE session_id = ?");
+        $stmt->bind_param("s", $session_id);
+        $stmt->execute();
+        $stmt->close();
+
+        // Potvrzení transakce
+        $conn->commit();
+
+        echo "New post and images assigned successfully!";
+
+    } catch (Exception $e) {
+        // Zrušení transakce v případě chyby
+        $conn->rollback();
+        echo "Error: " . $e->getMessage();
+    }
 }
 
 
 
+
 ?>
-<style>
+
+
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
     body{
             margin: 0;
             font-family: Arial, sans-serif;
         }
+
+        body.dark-mode{
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: black;
+            color: white;
+        }
+
         .navbar{
             list-style-type: none;
             overflow: hidden;
@@ -152,10 +215,11 @@ if(isset($_POST['save'])){
         display: flex;
         flex-direction: column;
         align-items: center;
+        justify-content: center;
 
     }
 
-    .items-container input[type="text"]{
+    .items-container .temp-name{
         width: 50%;
         padding: 10px;
         margin: 5px 0 20px 0;
@@ -187,26 +251,225 @@ if(isset($_POST['save'])){
     .image-container{
         display: flex;
         flex-wrap: wrap;
+        width: 600px;
+        min-height: 70px;
+        max-height: 500px;
+        
+        border: 2px solid gray;
         gap: 10px;
     }
 
     .image-preview{
-        height: 100px;
-        width: 100px;
+        height: 70px;
+        width: 150px;
     }
+
+    .tierlist-container {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        width: 600px;
+    }
+
+    .tier {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        width: 100%;
+        height: 80px;
+        position: relative;
+        
+    }
+
+    .tier-name {
+        background-color: #f0f0f0;
+        height: 100%;
+        width: 30%;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1;
+    }
+
+    .tier-content {
+        background-color: black;
+        height: 100%; /* Adjust as needed */
+        width: 100%;
+        margin-left: -20px;
+        
+    }
+
+    .tier-button {
+        height: 100%;
+        font-size: 30px;
+        background-color: gray;
+        border: none;
+        border-radius: 0 10px 10px 0;
+    }
+
+    .tier-name input{
+        background: none;
+        border: none;
+        width: 100%;
+        height: 100%;
+        text-align: center;
+        
+    }
+
+    .modal {
+        display: none; /* Hidden by default */
+        position: fixed; /* Stay in place */
+        z-index: 2; /* Sit on top */
+        left: 0;
+        top: 0;
+        width: 100%; /* Full width */
+        height: 100%; /* Full height */
+        overflow: auto; /* Enable scroll if needed */
+        background-color: rgb(0,0,0); /* Fallback color */
+        background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+    }
+
+    .modal-content {
+        background-color: #fefefe;
+        margin: 15% auto; /* 15% from the top and centered */
+        padding: 20px;
+        border: 1px solid #888;
+        border-radius: 10px;
+        width: 50%;
+        height: 50%;
+    }
+
+    .close {
+        color: #aaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+    }
+
+    .close:hover,
+    .close:focus {
+        color: black;
+        text-decoration: none;
+        cursor: pointer;
+    }
+
+    .color-circle {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        cursor: pointer;
+        border: 2px solid transparent;
+    }
+
+    .color-picker {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .color-circle.selected {
+        border: 2px solid black;
+    }
+
+    .add-btn{
+        width: 100%;
+        background-color: black;
+        height: 60px;
+        color: white;
+        font-size: 50px;
+        font-weight: bold;
+        border-radius: 10px;
+    }
+
+    .img-button{
+        margin-top: 40px;
+    }
+
+    .confirm-btn{
+        background-color: black;
+        color: white;
+        border: none;
+        border-radius: 0 0 5px 5px;
+        height: 30px;
+        width: 130px;
+        cursor: pointer;
+    }
+
+    .confirm-btn.disabled-btn{
+        cursor: not-allowed; /* Změna kurzoru na not-allowed */
+        opacity: 0.2; /* Změna průhlednosti pro zatmavení */
+    }
+
+    .desc{
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+        margin-bottom: -50px;
+    }
+
+    .img-button {
+        /* Příklad vlastních stylů */
+        padding: 10px;
+        background-color: #f7f7f7;
+        border: 1px dashed black;
+        border-bottom: none;
+        border-radius: 5px 5px 0 0;
+        cursor: pointer;
+    }
+
+    .img-button:hover {
+        background-color: #e7e7e7;
+    }
+
+    .upload-btn{
+        width: 600px;
+    }
+
+    .cover-container{
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 200px;
+        width: 30%;
+        border: 2px dashed grey;
+        border-radius: 10px;
+        margin-bottom: 20px;
+        overflow: hidden;
+        object-fit: cover;
+    }
+    
+    .cover-container input{
+        padding: 10px;
+        background-color: #f7f7f7;
+        border: 1px dashed black;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+
+    .cover-container input:hover{
+        background-color: #e7e7e7;
+    }
+    
+    .full-cover-container{
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .cover-preview{
+        
+    }
+    
+    
 
 
 
 </style>
-
-
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    
 </head>
 <body>
 
@@ -251,10 +514,24 @@ if(isset($_POST['save'])){
     </div>
 
 
+    <div class="desc">
+        <h1>Template Maker</h1>
+        <p>This template maker is only for creating templates, but not for rate the things in theme.</p>
+        <p>Everyone will be able to rank them after you upload it. Good Luck!</p>
+    </div>
     <div class="template-container">
-        <form action="" method="post" enctype="multipart/form-data">
+        
+        <form action="" method="post" id="tierListForm" enctype="multipart/form-data">
             <div class="items-container" id="screenshot">
-                <input type="text" name="tempName" placeholder="Name your template">
+                <input type="text" class="temp-name" name="tempName" placeholder="Name your template">
+                <div class="full-cover-container">
+                    <h3>Cover Image</h3>
+                    <div class="cover-container">
+                        <input type="file" id="coverInput" name="cover">
+                    </div>
+                </div>
+                
+                
                 <select name="theme" style="width: 50%; margin-bottom: 15px;">
                     <option value="music">Music</option>
                     <option value="cars">Cars</option>
@@ -263,70 +540,302 @@ if(isset($_POST['save'])){
                     <option value="books">Books</option>
                     <option value="other">Other</option>
                 </select>
-                <img src="TierList.jpg" alt="" width="768" height="432">
+                <div class="tierlist-container">
+                    <div class="tier">
+                        <div style="background-color: red;" class="tier-name"><input type="text" name="tiers[0][tier_name]" value="S"></div>
+                        <div class="tier-content"></div>
+                        <button type="button" class="tier-button" id="editTier">⚙️</button>
+                        <div id="colorPickerModal" class="modal">
+                            <div class="modal-content">
+                                <span class="close">&times;</span>
+                                <div class="color-picker" id="colorOptions">
+                                    <div class="color-circle" style="background-color: red;" data-color="red"></div>
+                                    <div class="color-circle" style="background-color: orange;" data-color="orange"></div>
+                                    <div class="color-circle" style="background-color: yellow;" data-color="yellow"></div>
+                                    <div class="color-circle" style="background-color: lightgreen;" data-color="lightgreen"></div>
+                                    <div class="color-circle" style="background-color: lightblue;" data-color="lightblue"></div>
+                                    <div class="color-circle" style="background-color: blue;" data-color="blue"></div>
+                                    <div class="color-circle" style="background-color: purple;" data-color="purple"></div>
+                                    <div class="color-circle" style="background-color: pink;" data-color="pink"></div>
+                                </div>
+                                <input type="hidden" class="selected-color" name="tiers[0][color]" value="red">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tier">
+                        <div style="background-color: orange;" class="tier-name"><input type="text" name="tiers[1][tier_name]" value="A"></div>
+                        <div class="tier-content"></div>
+                        <button type="button" class="tier-button" id="editTier">⚙️</button>
+                        <div id="colorPickerModal" class="modal">
+                            <div class="modal-content">
+                                <span class="close">&times;</span>
+                                <div class="color-picker" id="colorOptions">
+                                    <div class="color-circle" style="background-color: red;" data-color="red"></div>
+                                    <div class="color-circle" style="background-color: orange;" data-color="orange"></div>
+                                    <div class="color-circle" style="background-color: yellow;" data-color="yellow"></div>
+                                    <div class="color-circle" style="background-color: lightgreen;" data-color="lightgreen"></div>
+                                    <div class="color-circle" style="background-color: lightblue;" data-color="lightblue"></div>
+                                    <div class="color-circle" style="background-color: blue;" data-color="blue"></div>
+                                    <div class="color-circle" style="background-color: purple;" data-color="purple"></div>
+                                    <div class="color-circle" style="background-color: pink;" data-color="pink"></div>
+                                </div>
+                                <input type="hidden" class="selected-color" name="tiers[1][color]" value="orange">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tier">
+                        <div style="background-color: yellow;" class="tier-name"><input type="text" name="tiers[2][tier_name]" value="B"></div>
+                        <div class="tier-content"></div>
+                        <button type="button" class="tier-button" id="editTier">⚙️</button>
+                        <div id="colorPickerModal" class="modal">
+                            <div class="modal-content">
+                                <span class="close">&times;</span>
+                                <div class="color-picker" id="colorOptions">
+                                    <div class="color-circle" style="background-color: red;" data-color="red"></div>
+                                    <div class="color-circle" style="background-color: orange;" data-color="orange"></div>
+                                    <div class="color-circle" style="background-color: yellow;" data-color="yellow"></div>
+                                    <div class="color-circle" style="background-color: lightgreen;" data-color="lightgreen"></div>
+                                    <div class="color-circle" style="background-color: lightblue;" data-color="lightblue"></div>
+                                    <div class="color-circle" style="background-color: blue;" data-color="blue"></div>
+                                    <div class="color-circle" style="background-color: purple;" data-color="purple"></div>
+                                    <div class="color-circle" style="background-color: pink;" data-color="pink"></div>
+                                </div>
+                                <input type="hidden" class="selected-color" name="tiers[2][color]" value="yellow">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tier">
+                        <div style="background-color: lightgreen;" class="tier-name"><input type="text" name="tiers[3][tier_name]" value="C"></div>
+                        <div class="tier-content"></div>
+                        <button type="button" class="tier-button" id="editTier">⚙️</button>
+                        <div id="colorPickerModal" class="modal">
+                            <div class="modal-content">
+                                <span class="close">&times;</span>
+                                <div class="color-picker" id="colorOptions">
+                                    <div class="color-circle" style="background-color: red;" data-color="red"></div>
+                                    <div class="color-circle" style="background-color: orange;" data-color="orange"></div>
+                                    <div class="color-circle" style="background-color: yellow;" data-color="yellow"></div>
+                                    <div class="color-circle" style="background-color: lightgreen;" data-color="lightgreen"></div>
+                                    <div class="color-circle" style="background-color: lightblue;" data-color="lightblue"></div>
+                                    <div class="color-circle" style="background-color: blue;" data-color="blue"></div>
+                                    <div class="color-circle" style="background-color: purple;" data-color="purple"></div>
+                                    <div class="color-circle" style="background-color: pink;" data-color="pink"></div>
+                                </div>
+                                <input type="hidden" class="selected-color" name="tiers[3][color]" value="lightgreen">
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <button type="button" class="add-btn">+</button>
+                    </div>
+                </div>
+                    
+                
 
-                <input type="file" id="imageInput" name="images[]" multiple onchange="previewImages()" accept="image/*" class="img-button">
+                <input type="file" id="fileInput" name="files[]" accept="image/*" class="img-button">
                 <div class="image-container" id="imageContainer"></div>
+                <button type="button" class="confirm-btn" id="submitButton">Confirm Images</button>
             </div>
             <div class="buttons-container">
-                <button type="submit" name="save">Upload Template</button>
+                <button type="submit" class="upload-btn" name="upload">Upload Template</button>
                 
             </div>
         </form>
-        <div class="buttons-container">
-            <button id="downloadbtn">Download Template</button>
-        </div>
+        
         
     </div>
 
     <script>
-        function previewImages() {
-            var input = document.getElementById('imageInput');
-            var container = document.getElementById('imageContainer');
 
-            for (var i = 0; i < input.files.length; i++) {
-                (function (file) {
-                    var reader = new FileReader();
+        document.getElementById("coverInput").addEventListener('change', function(event){
+            const coverContainer = document.querySelector(".cover-container");
+            var file = document.getElementById("coverInput").files[0];
 
-                    reader.onloadend = function () {
-                        var img = document.createElement('img');
-                        img.src = reader.result;
-                        img.classList.add('image-preview');
-
-                        img.addEventListener('click', function () {
-                            this.remove();
-                        });
-                        container.appendChild(img);
-                    };
-
-                    if (file) {
-                        reader.readAsDataURL(file);
-                    }
-                })(input.files[i]);
+            const reader = new FileReader();
+            reader.onload = function(e){
+                const img = document.createElement("img");
+                img.src = e.target.result;
+                img.classList.add("cover-preview");
+                coverContainer.appendChild(img);
             }
-        }
+            reader.readAsDataURL(file);
+        });
 
-        document.getElementById('downloadbtn').addEventListener('click', function(){
-            html2canvas(document.getElementById('screenshot')).then(function(canvas) {
         
-                var dataUrl = canvas.toDataURL('image/jpeg');
-                
-                var link = document.createElement('a');
-                link.href = dataUrl;
-                link.download = 'template.jpg';
-                
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
+        document.addEventListener('DOMContentLoaded', function() {
+            const fileInput = document.getElementById('fileInput');
+            const submitButton = document.getElementById('submitButton');
+            const previewContainer = document.getElementById('imageContainer');
+            let filesArray = [];
+
+            // Přidání vybraných souborů do pole a zobrazení náhledů
+            fileInput.addEventListener('change', function(event) {
+                const selectedFiles = event.target.files;
+                for (let i = 0; i < selectedFiles.length; i++) {
+                    const file = selectedFiles[i];
+                    filesArray.push(file);
+
+                    // Vytvoření náhledu obrázku
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const img = document.createElement('img');
+                        img.src = e.target.result;
+                        img.classList.add('image-preview');
+                        previewContainer.appendChild(img);
+                    }
+                    reader.readAsDataURL(file);
+                }
+                // Reset file input, aby bylo možné vybrat stejné soubory vícekrát
+                fileInput.value = '';
+            });
+
+            // Odeslání všech vybraných souborů do databáze
+            submitButton.addEventListener('click', function() {
+                if (filesArray.length > 0) {
+                    const formData = new FormData();
+                    filesArray.forEach((file, index) => {
+                        formData.append('files[]', file, file.name);
+                    });
+
+                    fetch('upload.php', {
+                        method: 'POST',
+                        body: formData
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log('Success:', data);
+                        // Vyčistíme pole po úspěšném odeslání
+                        filesArray = [];
+                        // Vymažeme náhledy
+                        previewContainer.innerHTML = '';
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                    });
+
+                    submitButton.disabled = true;
+                    submitButton.classList.add("disabled-btn");
+                    submitButton.removeEventListener('click');
+                } else {
+                    alert('Žádné soubory k odeslání.');
+                }
             });
         });
+
+        
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const tiers = document.querySelectorAll('.tier');
+
+            function addEventListeners(tier){
+                const btn = tier.querySelector('.tier-button');
+                const modal = tier.querySelector('.modal');
+                const span = modal.querySelector('.close');
+                const colorCircles = modal.querySelectorAll('.color-circle');
+                const hiddenInput = modal.querySelector('.selected-color');
+                const targetElement = tier.querySelector('.tier-name');
+
+                colorCircles.forEach(circle => {
+                    circle.addEventListener('click', function() {
+                        // Odstraníme třídu 'selected' ze všech kruhů
+                        colorCircles.forEach(c => c.classList.remove('selected'));
+                        
+                        // Přidáme třídu 'selected' na kliknutý kruh
+                        circle.classList.add('selected');
+                        
+                        // Nastavíme hodnotu skrytého inputu na vybranou barvu
+                        hiddenInput.value = circle.getAttribute('data-color');
+
+                        targetElement.style.backgroundColor = hiddenInput.value;
+                    });
+                });
+
+                targetElement.style.backgroundColor = hiddenInput.value;
+
+                btn.onclick = function() {
+                    modal.style.display = "block";
+                }
+
+                span.onclick = function() {
+                    modal.style.display = "none";
+                }
+
+                window.onclick = function(event) {
+                    if (event.target == modal) {
+                        modal.style.display = "none";
+                    }
+                }
+            }
+
+            
+            tiers.forEach(tier => {
+                addEventListeners(tier);
+            });
+            
+            const addButton = document.querySelector('.add-btn');
+            const tierListContainer = document.querySelector('.tierlist-container');
+            let tierIndex = 4;
+
+            addButton.addEventListener('click', function () {
+                const tier = document.querySelector('.tier').cloneNode(true);
+
+
+                
+
+                resetTierFields(tier);
+                addEventListeners(tier);
+                updateAttributeIndexes(tier, tierIndex);
+                tierIndex++;
+
+                
+
+                tierListContainer.insertBefore(tier, addButton.parentNode);
+            });
+        });
+
+        function updateAttributeIndexes(questionContainer, index){
+            const inputs = questionContainer.querySelectorAll('input');
+
+            inputs.forEach(input => {
+                if (input.hasAttribute('name')) {
+                    const name = input.getAttribute('name');
+                    input.setAttribute('name', updateIndexInString(name, index));
+                }
+            });
+        }
+
+        function updateIndexInString(str, index) {
+            
+            return str.replace(/\[\d+\]/, '[' + index + ']');
+        }
+
+
+
+
+
+        
+
+
+        function resetTierFields(tier) {
+            const inputs = tier.querySelectorAll('input');
+
+            inputs.forEach(input => {
+                if(input.type == 'text'){
+                    input.value = 'NEW TIER';
+                } else if(input.type == 'hidden'){
+                    input.value = 'yellow';
+                }
+            });
+
+            
+        }
 
         
 
 
 
     </script>
-    <script src="https://html2canvas.hertzen.com/dist/html2canvas.js"></script>
+    
 
     <script>
         let subMenu = document.getElementById('subMenu');
@@ -334,6 +843,18 @@ if(isset($_POST['save'])){
         function toggleMenu(){
             subMenu.classList.toggle('open-menu');
         }
+
+        document.addEventListener('DOMContentLoaded', (event) => {
+            const toggle = document.getElementById('darkModeToggle');
+
+            // Zkontrolovat a aplikovat uložené nastavení
+            if (localStorage.getItem('darkMode') === 'enabled') {
+                document.body.classList.add('dark-mode');
+                toggle.checked = true;
+            }
+
+            
+        });
     </script>
     
 </body>

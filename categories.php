@@ -22,6 +22,13 @@ $query = mysqli_query($conn, $sql);
             font-family: Arial, sans-serif;
         }
 
+        body.dark-mode{
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: black;
+            color: white;
+        }
+
         .navbar{
             list-style-type: none;
             overflow: hidden;
@@ -40,6 +47,11 @@ $query = mysqli_query($conn, $sql);
             text-align: center;
             padding: 28px 35px;
             text-decoration: none;
+        }
+
+        .navbar a:hover {
+            background-color: #333333;
+            color: #ffffff;
         }
 
         .profile-img{
@@ -149,18 +161,18 @@ $query = mysqli_query($conn, $sql);
             content: '';
             position: absolute;
             left: 0;
-            bottom: 0px; /* Vzdálenost podtržení od textu */
-            width: 100%; /* 100% šířka textu */
-            height: 2px; /* Tloušťka podtržení */
-            background-color: lightgreen; /* Barva podtržení */
+            bottom: 0px; 
+            width: 100%; 
+            height: 2px; 
+            background-color: lightgreen; 
             position: absolute;
-            transform: scaleX(0); /* Výchozí stav, podtržení není viditelné */
-            transition: transform 0.7s ease; /* Plynulá animace */
+            transform: scaleX(0); 
+            transition: transform 0.7s ease;
         }
 
-        /* Animace podtržení při najetí myší */
+        
         .cat-container a:hover::after {
-            transform: scaleX(1.0); /* Roztažení podtržení na 100% šířky textu */
+            transform: scaleX(1.0); 
             
         }
 
@@ -168,6 +180,19 @@ $query = mysqli_query($conn, $sql);
             transform: scale(1.1);
             
         }
+
+        body.dark-mode .cat-container a{
+            border: 2px solid white;
+        }
+
+        body.dark-mode .navbar{
+            background-color: #1a1a1a;
+        }
+
+        body.dark-mode .sub-menu{
+            background-color:  #1a1a1a;
+        }
+        
 
         
         
@@ -239,6 +264,28 @@ $query = mysqli_query($conn, $sql);
         function toggleMenu(){
             subMenu.classList.toggle('open-menu');
         }
+
+
+        document.addEventListener('DOMContentLoaded', (event) => {
+            const toggle = document.getElementById('darkModeToggle');
+
+            // Zkontrolovat a aplikovat uložené nastavení
+            if (localStorage.getItem('darkMode') === 'enabled') {
+                document.body.classList.add('dark-mode');
+                toggle.checked = true;
+            }
+
+            // Při změně přepínače změnit režim
+            toggle.addEventListener('change', () => {
+                if (toggle.checked) {
+                    document.body.classList.add('dark-mode');
+                    localStorage.setItem('darkMode', 'enabled');
+                } else {
+                    document.body.classList.remove('dark-mode');
+                    localStorage.setItem('darkMode', 'disabled');
+                }
+            });
+        });
     </script>
     
 </body>

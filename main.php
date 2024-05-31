@@ -25,6 +25,14 @@ if(isset($_POST['createTL'])){
             margin: 0;
             font-family: Arial, sans-serif;
         }
+
+        body.dark-mode{
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: black;
+            color: white;
+        }
+
         .navbar{
             list-style-type: none;
             overflow: hidden;
@@ -44,6 +52,25 @@ if(isset($_POST['createTL'])){
             text-align: center;
             padding: 28px 35px;
             text-decoration: none;
+        }
+
+        .navbar li .quiz-link{
+            padding: 10px 10px;
+            display: flex;
+            gap: 10px;
+            top: 17px;
+            background-color: #0574a1;
+            border-radius: 10px;
+            left: 15px;
+        }
+
+        .navbar li .quiz-link span{
+            font-size: 12px;
+            transition: transform 0.5s;
+        }
+
+        .navbar li .quiz-link:hover span{
+            transform: translateX(5px);
         }
 
         .profile-img{
@@ -171,6 +198,7 @@ if(isset($_POST['createTL'])){
         <li><a href="tierlists.php">Tier Lists</a></li>
         <li><a href="categories.php">Categories</a></li>
         <li style="float:left"><a style="padding: 0;" href="main.php"><img src="logoprostranku.png" alt="" width="150" height="70"></a></li>
+        <li style="float:left"><a class="quiz-link" href="quizMain.php">Switch to Quiz Page <span>></span></a></li>
     </ul>
 
     <div class="sub-menu-wrap" id="subMenu">
@@ -212,6 +240,28 @@ if(isset($_POST['createTL'])){
         function toggleMenu(){
             subMenu.classList.toggle('open-menu');
         }
+
+
+        document.addEventListener('DOMContentLoaded', (event) => {
+            const toggle = document.getElementById('darkModeToggle');
+
+            // Zkontrolovat a aplikovat uložené nastavení
+            if (localStorage.getItem('darkMode') === 'enabled') {
+                document.body.classList.add('dark-mode');
+                toggle.checked = true;
+            }
+
+            // Při změně přepínače změnit režim
+            toggle.addEventListener('change', () => {
+                if (toggle.checked) {
+                    document.body.classList.add('dark-mode');
+                    localStorage.setItem('darkMode', 'enabled');
+                } else {
+                    document.body.classList.remove('dark-mode');
+                    localStorage.setItem('darkMode', 'disabled');
+                }
+            });
+        });
     </script>
 </body>
 </html>

@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+
+    <style>
+        #imageContainer {
+            width: 100%;
+            max-width: 500px;
+            margin-top: 20px;
+            border: 1px solid #ccc;
+            padding: 10px;
+            text-align: center;
+        }
+
+        #imageContainer img {
+            max-width: 100%;
+            height: auto;
+        }
+    </style>
+</head>
+<body>
+    <input type="text" name="imageUrl" id="imageUrl">
+    <button id="showImg">Submit</button>
+
+    <div id="imageContainer"></div>
+
+    <script>
+        document.getElementById('showImg').addEventListener('click', function(event) {
+            const imageUrl = document.getElementById('imageUrl').value;
+            const imageContainer = document.getElementById('imageContainer');
+
+            // Vymaže předchozí obsah kontejneru
+            imageContainer.innerHTML = '';
+
+            // Vytvoří nový prvek <img>
+            const img = document.createElement('img');
+            img.src = imageUrl;
+            img.alt = 'Načtený obrázek';
+
+            // Přidá obrázek do kontejneru
+            imageContainer.appendChild(img);
+        });
+    </script>
+</body>
+</html>

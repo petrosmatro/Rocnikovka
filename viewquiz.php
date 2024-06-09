@@ -20,6 +20,8 @@ if(isset($_GET['id'])){
     $results = mysqli_query($conn, "SELECT * FROM results JOIN users ON results.user = users.id_user WHERE id_quiz = $id ORDER BY accuracy DESC");
 }
 
+$id_quiz = $_GET['id'];
+
 
 ?>
 
@@ -35,6 +37,7 @@ if(isset($_GET['id'])){
         body{
             margin: 0;
             font-family: Arial, sans-serif;
+            background: linear-gradient(to bottom right, #add8e6, #00008b);
         }
 
         body.dark-mode{
@@ -42,9 +45,16 @@ if(isset($_GET['id'])){
             font-family: Arial, sans-serif;
             background-color: black;
             color: white;
+            background: linear-gradient(to bottom right, #4b0082, #800080, #8b008b);
         }
 
-        
+        body.dark-mode .navbar{
+            background-color: #1a1a1a;
+        }
+
+        body.dark-mode .sub-menu{
+            background-color:  #1a1a1a;
+        }
 
         .navbar{
             list-style-type: none;
@@ -93,6 +103,7 @@ if(isset($_GET['id'])){
             position: relative;
             border-radius: 50%;
             margin-left: 30px;
+            object-fit: cover;
         }
 
         .sub-menu-wrap{
@@ -130,6 +141,7 @@ if(isset($_GET['id'])){
             height: 30px;
             border-radius: 50%;
             margin-right: 15px;
+            object-fit: cover;
         }
 
         .sub-menu hr{
@@ -174,6 +186,11 @@ if(isset($_GET['id'])){
             flex-direction: row;
             overflow: hidden;
             border: 1px solid #ddd;
+        }
+
+        body.dark-mode .quiz-preview{
+            background-color: #1a1a1a;
+            border: none;
         }
 
         .quiz-preview div{
@@ -257,6 +274,10 @@ if(isset($_GET['id'])){
             font-weight: bold;
         }
 
+        body.dark-mode .user-row h3{
+            color: white;
+        }
+
         .left-side hr{
             border: 0;
             height: 2px;
@@ -290,6 +311,10 @@ if(isset($_GET['id'])){
             border-radius: 10px;
         }
 
+        body.dark-mode .table-container{
+            background-color: #1a1a1a;
+        }
+
         .results-table {
             width: 100%;
             border-collapse: collapse;
@@ -308,12 +333,24 @@ if(isset($_GET['id'])){
             top: 0; /* Fixuje hlavičku tabulky při rolování */
         }
 
+        body.dark-mode .results-table th{
+            background-color: #1A1A1A;
+        }
+
         .results-table tr:nth-child(even) {
             background-color: #f9f9f9;
+        }
+        
+        body.dark-mode .results-table tr:nth-child(even){
+            background-color: black;
         }
 
         .results-table tr:hover {
             background-color: #f1f1f1;
+        }
+
+        body.dark-mode tr:hover{
+            background-color: black;
         }
 
         .results-table a{
@@ -323,10 +360,80 @@ if(isset($_GET['id'])){
             border-radius: 3px;
             color: white;
         }
+
+        .comment-form-container {
+            margin: 50px auto;
+            display: flex;
+            align-items: flex-start;
+            width: 700px;
+        }
+
+        .profile-picture {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            margin-right: 15px;
+            object-fit: cover;
+        }
+
+        .comment-form {
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+        }
+
+        .comment-form textarea {
+            width: 100%;
+            height: 100px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            resize: none;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        body.dark-mode .comment-form textarea {
+            background-color: #1a1a1a;
+            color: white;
+        }
+
+        .comment-form button {
+            align-self: flex-end;
+            padding: 10px 20px;
+            background-color: #0574a1;
+            color: white;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .comment-form button:hover {
+            background-color: #0056b3;
+        }
+
+        .comments-container{
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        body.dark-mode .comment-container{
+            background-color: #1a1a1a;
+        }
+
+        body.dark-mode .comment-container span{
+            color: white;
+        }
         
 
         
     </style>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
 </head>
 <body>
 
@@ -346,11 +453,10 @@ if(isset($_GET['id'])){
                 }
             ?>
         </li>
-        <li><a href="myTemplates.php">My Templates</a></li>
         <li><a href="tierlists.php">Tier Lists</a></li>
-        <li><a href="categories.php">Categories</a></li>
-        <li style="float:left"><a style="padding: 0;" href="main.php"><img src="logoprostranku.png" alt="" width="150" height="70"></a></li>
-        <li style="float:left"><a class="quiz-link" href="quizMain.php">Switch to Quiz Page <span>></span></a></li>
+        <li><a href="quizCategories.php">Categories</a></li>
+        <li style="float:left"><a style="padding: 0;" href="quizMain.php"><img src="quizSection.png" alt="" width="150" height="70"></a></li>
+        <li style="float:left"><a class="tier-link" href="main.php">Switch to Tier Lists Page</a></li>
     </ul>
 
     <div class="sub-menu-wrap" id="subMenu">
@@ -364,10 +470,21 @@ if(isset($_GET['id'])){
                 <p>Edit Account</p>
                 <span>></span>
             </a>
+            <a href="myTemplates.php" class="sub-menu-link">
+                <p>My Templates</p>
+                <span>></span>
+            </a>
+            <?php if($_SESSION['user_type'] == 'admin'){?>
+                <a href="database.php" class="sub-menu-link">
+                    <p>Database</p>
+                    <span>></span>
+                </a>
+            <?php }?>
             <a href="logout.php" class="sub-menu-link">
                 <p>Logout</p>
                 <span>></span>
             </a>
+            
         </div>
     </div>
 
@@ -436,8 +553,57 @@ if(isset($_GET['id'])){
                 </tbody>
             </table>
         </div>
+    
+        <div class="comment-form-container">
+            <img src="profileimgs/<?php echo $image?>" alt="Profile Picture" class="profile-picture">
+            <form id="commentForm" class="comment-form" method="post">
+                <textarea id="comment" name="comment" placeholder="Write your comment..." required></textarea>
+                <button name="post_comment" type="submit">Post</button>
+            </form>
+        </div>
+
+        <div id="comments" class="comments-container">
+            
+        </div>
 
     <script>
+        let subMenu = document.getElementById('subMenu');
+        function toggleMenu(){
+            subMenu.classList.toggle('open-menu');
+        }
+
+        $(document).ready(function() {
+            loadComments();
+            $('#commentForm').on('submit', function(event) {
+                event.preventDefault();
+
+                var comment = $('#comment').val();
+
+                $.ajax({
+                    url: 'add_quiz_comment.php?id=<?php echo $id_quiz;?>',
+                    type: 'POST',
+                    data: {comment: comment},
+                    success: function() {
+                        loadComments();
+                        $('#comment').val('');
+                    }
+                });
+            });
+
+            function loadComments() {
+                $.ajax({
+                    url: 'load_quizzes_comments.php?id=<?php echo $id_quiz;?>',
+                    type: 'GET',
+                    success: function(response) {
+                        $('#comments').html(response);
+                    }
+                });
+            }
+        });
+
+
+
+
         document.addEventListener('DOMContentLoaded', (event) => {
             const toggle = document.getElementById('darkModeToggle');
 
@@ -447,17 +613,23 @@ if(isset($_GET['id'])){
                 toggle.checked = true;
             }
 
-            // Při změně přepínače změnit režim
-            toggle.addEventListener('change', () => {
-                if (toggle.checked) {
-                    document.body.classList.add('dark-mode');
-                    localStorage.setItem('darkMode', 'enabled');
-                } else {
-                    document.body.classList.remove('dark-mode');
-                    localStorage.setItem('darkMode', 'disabled');
-                }
-            });
+            
         });
+
+        function deleteComment(id) {
+            const xhr = new XMLHttpRequest();
+            xhr.open('POST', 'delete_quiz_comment.php?id=' + id, true);
+            xhr.onload = function() {
+                if (this.status === 200) {
+                    document.getElementById('comment-' + id).remove();
+                } else {
+                    alert('Chyba při mazání záznamu.');
+                }
+            }
+            xhr.send();
+        }
+
+        
     </script>
 </body>
 </html>

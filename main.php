@@ -11,6 +11,8 @@ if(isset($_POST['createTL'])){
     }
 }
 
+$random = mysqli_query($conn, "SELECT * FROM tierlists JOIN users ON tierlists.autor = users.id_user ORDER BY RAND() LIMIT 10");
+
 
 ?>
 
@@ -24,6 +26,7 @@ if(isset($_POST['createTL'])){
         body{
             margin: 0;
             font-family: Arial, sans-serif;
+            background: linear-gradient(to bottom right, #add8e6, #00008b);
         }
 
         body.dark-mode{
@@ -31,6 +34,7 @@ if(isset($_POST['createTL'])){
             font-family: Arial, sans-serif;
             background-color: black;
             color: white;
+            background: linear-gradient(to bottom right, #4b0082, #800080, #8b008b);
         }
 
         .navbar{
@@ -80,6 +84,7 @@ if(isset($_POST['createTL'])){
             position: relative;
             border-radius: 50%;
             margin-left: 30px;
+            object-fit: cover;
         }
 
         .main-text{
@@ -87,6 +92,14 @@ if(isset($_POST['createTL'])){
             margin-top: 10%;
             margin-left: 20%;
             margin-right: 20%;
+            padding: 30px;
+            border-radius: 30px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+            background-color: white;
+        }
+
+        body.dark-mode .main-text{
+            background-color: #1a1a1a;
         }
 
         .main-text button{
@@ -95,7 +108,8 @@ if(isset($_POST['createTL'])){
             padding: 20px;
             text-decoration: none;
             background-color: green;
-            
+            border: none;
+            border-radius: 20px;
         }
 
         .error-msg{
@@ -139,6 +153,7 @@ if(isset($_POST['createTL'])){
             height: 30px;
             border-radius: 50%;
             margin-right: 15px;
+            object-fit: cover;
         }
 
         .sub-menu hr{
@@ -172,6 +187,135 @@ if(isset($_POST['createTL'])){
             font-weight: 600;
         }
 
+        body.dark-mode .navbar{
+            background-color: #1a1a1a;
+        }
+
+        body.dark-mode .sub-menu{
+            background-color:  #1a1a1a;
+        }
+
+        .tierlist{
+            display: inline-block;
+            height: 200px;
+            width: 300px;
+            position: relative;
+            border: 1.5px solid black;
+        }
+
+        .tierlist a{
+            width: 100%;
+            height: 100%;
+            display: block;
+            text-decoration: none;
+            color: white;
+            position: relative;
+        }
+
+        .cover-img{
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            position: absolute;
+        }
+
+        .cover-img img{
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .tier-name{
+            width: 100%;
+            height: 30%;
+            background-color: #1A1A1A;
+            position: absolute;
+            margin-top: 140px;
+            z-index: 2;
+            display: flex;
+            align-items: center;
+        }
+
+        
+
+        .author-container{
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            margin-left: 10px;
+            overflow: hidden;
+        }
+
+        .author-container img{
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .tier-info{
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            margin-left: 10px;
+            flex-direction: column;
+            
+        }
+
+        .author-username{
+            font-size: 12px;
+        }
+
+        .scrollable-container {
+            overflow-x: auto;
+            white-space: nowrap;
+            background-color: #fff;
+            border: 1px solid black;
+            width: 1000px;
+        }
+
+        body.dark-mode .scrollable-container {
+            background-color: #1a1a1a;
+        }
+
+        
+
+        .scrollable-content {
+            display: inline-block;
+        }
+
+        .random-container{
+            width: 100%;
+            
+            display: flex;
+            align-items: center;
+            flex-direction: column;
+        }
+
+        .random-title{
+           
+        }
+
+        .random-tierlists{
+            padding-left: 20px;
+            padding-right: 20px;
+            padding-top: 10px;
+            width: 1000px;
+            border-radius: 30px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+            background-color: white;
+            margin-left: 130px;
+            margin-top: 40px;
+            margin-bottom: 40px;
+            overflow: hidden;
+            padding-bottom: 20px;
+        }
+
+        body.dark-mode .random-tierlists{
+            background-color: #1a1a1a;
+        }
+
+        
+
         
     </style>
 
@@ -194,11 +338,10 @@ if(isset($_POST['createTL'])){
                 }
             ?>
         </li>
-        <li><a href="myTemplates.php">My Templates</a></li>
         <li><a href="tierlists.php">Tier Lists</a></li>
         <li><a href="categories.php">Categories</a></li>
         <li style="float:left"><a style="padding: 0;" href="main.php"><img src="logoprostranku.png" alt="" width="150" height="70"></a></li>
-        <li style="float:left"><a class="quiz-link" href="quizMain.php">Switch to Quiz Page <span>></span></a></li>
+        <li style="float:left"><a class="quiz-link" href="quizMain.php">Switch to Quiz Page</a></li>
     </ul>
 
     <div class="sub-menu-wrap" id="subMenu">
@@ -212,10 +355,21 @@ if(isset($_POST['createTL'])){
                 <p>Edit Account</p>
                 <span>></span>
             </a>
+            <a href="myTemplates.php" class="sub-menu-link">
+                <p>My Templates</p>
+                <span>></span>
+            </a>
+            <?php if($_SESSION['user_type'] == 'admin'){?>
+                <a href="database.php" class="sub-menu-link">
+                    <p>Database</p>
+                    <span>></span>
+                </a>
+            <?php }?>
             <a href="logout.php" class="sub-menu-link">
                 <p>Logout</p>
                 <span>></span>
             </a>
+            
         </div>
     </div>
    
@@ -233,6 +387,40 @@ if(isset($_POST['createTL'])){
             
         </div>
     </form>
+
+    <div class="random-tierlists">
+    <h2 class="random-title">Random Tierlists</h2>
+    <div class="random-container">
+        
+        <div class="scrollable-container">
+            <div class="scrollable-content">
+                <?php foreach($random as $r){?>
+                    <div class="tierlist">
+                        
+                    <a href="viewlist.php?id=<?php echo $r['id_tier']?>">
+                        <div class="cover-img">
+                            <img src="coverimgs/<?php echo $r['cover'];?>">
+                        </div>
+                        <div class="tier-name">
+                            <div class="author-container">
+                                <img src="profileimgs/<?php echo $r['image']?>" alt="">
+                            </div>
+                            <div class="tier-info">
+                                <span class="tier-title"><?php echo $r['nazev'];?></span>
+                                <span class="author-username"><?php echo $r['username'];?></span>
+                            </div>
+                            
+                        </div>
+                    </a>
+                        
+                </div>
+                <?php }?>
+            </div>
+        </div>
+    </div>
+    </div>
+    
+    
 
     <script>
         let subMenu = document.getElementById('subMenu');

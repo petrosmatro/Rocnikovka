@@ -26,6 +26,7 @@
         body{
             margin: 0;
             font-family: Arial, sans-serif;
+            background: linear-gradient(to bottom right, #add8e6, #00008b);
         }
 
         body.dark-mode{
@@ -33,6 +34,15 @@
             font-family: Arial, sans-serif;
             background-color: black;
             color: white;
+            background: linear-gradient(to bottom right, #4b0082, #800080, #8b008b);
+        }
+
+        body.dark-mode .navbar{
+            background-color: #1a1a1a;
+        }
+
+        body.dark-mode .sub-menu{
+            background-color:  #1a1a1a;
         }
 
         .navbar{
@@ -82,6 +92,7 @@
             position: relative;
             border-radius: 50%;
             margin-left: 30px;
+            object-fit: cover;
         }
 
         .sub-menu-wrap{
@@ -119,6 +130,7 @@
             height: 30px;
             border-radius: 50%;
             margin-right: 15px;
+            object-fit: cover;
         }
 
         .sub-menu hr{
@@ -155,9 +167,9 @@
         .questions-count{
             display: flex;
             flex-direction: row;
-            margin-left: 930px;
+            margin-left: 900px;
             position: absolute;
-            margin-top: 60px;
+            margin-top: 90px;
         }
 
         .previous-btn{
@@ -165,10 +177,15 @@
             margin-top: -350px;
             margin-left: 200px;
             padding: 10px;
-            border: 1px solid grey;
+            border: 1px solid white;
             border-radius: 30px;
             background-color: transparent;
+            color: white;
             transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        body.dark-mode .previous-btn{
+            color: white;
         }
 
         .next-btn{
@@ -176,10 +193,15 @@
             margin-top: -350px;
             margin-left: 1000px;
             padding: 10px;
-            border: 1px solid grey;
+            border: 1px solid white;
             border-radius: 30px;
             background-color: transparent;
+            color: white;
             transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        body.dark-mode .next-btn{
+            color: white;
         }
 
         .previous-btn:hover{
@@ -190,6 +212,16 @@
         .next-btn:hover{
             background-color: grey;
             color: white;
+        }
+
+        .load-questions{
+            padding: 10px;
+            background-color: white;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+            border-radius: 20px;
+            width: 600px;
+            margin: 50px auto;
+            padding-right: 20px;
         }
 
 
@@ -212,10 +244,10 @@
                 }
             ?>
         </li>
-        <li><a href="myTemplates.php">My Templates</a></li>
         <li><a href="quizzes.php">Quizzes</a></li>
-        <li><a href="categories.php">Categories</a></li>
-        <li style="float:left"><a class="tier-link" href="main.php">Switch to Tier Lists Page <span>></span></a></li>
+        <li><a href="quizCategories.php">Categories</a></li>
+        <li style="float:left"><a style="padding: 0;" href="quizMain.php"><img src="quizSection.png" alt="" width="150" height="70"></a></li>
+        <li style="float:left"><a class="tier-link" href="main.php">Switch to Tier Lists Page</a></li>
     </ul>
 
     <div class="sub-menu-wrap" id="subMenu">
@@ -229,10 +261,21 @@
                 <p>Edit Account</p>
                 <span>></span>
             </a>
+            <a href="myTemplates.php" class="sub-menu-link">
+                <p>My Templates</p>
+                <span>></span>
+            </a>
+            <?php if($_SESSION['user_type'] == 'admin'){?>
+                <a href="database.php" class="sub-menu-link">
+                    <p>Database</p>
+                    <span>></span>
+                </a>
+            <?php }?>
             <a href="logout.php" class="sub-menu-link">
                 <p>Logout</p>
                 <span>></span>
             </a>
+            
         </div>
     </div>
 
@@ -242,7 +285,8 @@
         <div id="total_que">0</div>
     </div>
 
-    <div id="load_questions">
+    
+    <div id="load_questions" class="load-questions">
 
     </div>
 
@@ -261,6 +305,13 @@
 
 
     <script>
+
+        let subMenu = document.getElementById('subMenu');
+
+        function toggleMenu(){
+            subMenu.classList.toggle('open-menu');
+        }
+
         function load_total_que(){
             var xmlhttp = new XMLHttpRequest();
             xmlhttp.onreadystatechange = function(){
@@ -323,8 +374,32 @@
             xmlhttp.send(null);
         }
 
+        document.body.addEventListener('click', function(event) {
+            
+            var outerDiv = event.target.closest('div[class^="answer-item"]');
+            if (outerDiv) {
+                var checkbox = outerDiv.querySelector('.answer-checkbox');
+                if (checkbox) {
+                    checkbox.click();
+                }
+                if(checkbox.checked) {
+                    outerDiv.classList.add('active');
+                } else{
+                    outerDiv.classList.remove('active');
+                }
+                
+            }
+        });
+
+        
+
+        
+
+        
+
         document.addEventListener('DOMContentLoaded', (event) => {
             const toggle = document.getElementById('darkModeToggle');
+
 
             // Zkontrolovat a aplikovat uložené nastavení
             if (localStorage.getItem('darkMode') === 'enabled') {

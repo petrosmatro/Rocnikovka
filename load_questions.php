@@ -36,8 +36,7 @@ else{
 
 <style>
     .question{
-        width: 50%;
-        margin: 50px auto;
+        width: 100%;
     }
 
     .file-upload {
@@ -89,21 +88,41 @@ else{
     .answer-item-1{
         border: 2px solid;
         border-color: red;
+        cursor: pointer;
+    }
+
+    .answer-item-1.active{
+        background-color: rgba(255, 0, 0, 0.5);
     }
 
     .answer-item-2{
         border: 2px solid;
         border-color: blue;
+        cursor: pointer;
+    }
+
+    .answer-item-2.active{
+        background-color: rgba(0, 0, 255, 0.5);
     }
 
     .answer-item-3{
         border: 2px solid;
         border-color: #f2e01b;
+        cursor: pointer;
+    }
+
+    .answer-item-3.active{
+        background-color: rgba(255, 255, 0, 0.5);
     }
 
     .answer-item-4{
         border: 2px solid;
         border-color: green;
+        cursor: pointer;
+    }
+
+    .answer-item-4.active{
+        background-color: rgba(0, 255, 0, 0.5);
     }
 
     .answer-item-1 .answer-word{
@@ -134,7 +153,15 @@ else{
 
     <div class="answers">
         <?php $word = 'A'; $index = 1; foreach($res as $r){?>
-            <div onclick="toggleCheckbox();" class="answer-item-<?php echo $index?>"><div class="answer-word"><?php echo $word;?></div><input type="hidden" value="<?php echo $r['id_ans']?>"><span><?php echo $r['answer_text'];?><input type="checkbox" value="<?php echo $r['answer_text']?>" onclick="checkboxClick(this.value, <?php echo $question_no;?>);" <?php if($ans == $r['answer_text']){ echo "checked";} ?>></span></div>
+            <div class="answer-item-<?php echo $index?>">
+                <div class="answer-word"><?php echo $word;?></div>
+                <input type="hidden" value="<?php echo $r['id_ans']?>">
+                <span>
+                    <?php echo $r['answer_text'];?>
+                    <input class="answer-checkbox" type="checkbox" value="<?php echo $r['answer_text']?>" onclick="checkboxClick(this.value, <?php echo $question_no;?>);" 
+                    <?php if($ans == $r['answer_text']){ echo "checked";} ?>>
+                </span>
+            </div>
         <?php $index++; $word = chr(ord($word) + 1); }?>
     </div>
             

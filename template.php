@@ -14,7 +14,7 @@ if (isset($_POST['upload'])) {
     $author = $_SESSION['id'];
     $session_id = $_SESSION['session_id'];
 
-    // Zahájit transakci
+    
     $conn->begin_transaction();
 
     try {
@@ -47,25 +47,25 @@ if (isset($_POST['upload'])) {
             
         }
 
-        // Přiřazení obrázků z dočasné tabulky k příspěvku
+        
         $stmt = $conn->prepare("INSERT INTO images (nazev, tierlist) SELECT img_name, ? FROM temp_images WHERE session_id = ?");
         $stmt->bind_param("is", $post_id, $session_id);
         $stmt->execute();
         $stmt->close();
 
-        // Smazání záznamů z dočasné tabulky
+        
         $stmt = $conn->prepare("DELETE FROM temp_images WHERE session_id = ?");
         $stmt->bind_param("s", $session_id);
         $stmt->execute();
         $stmt->close();
 
-        // Potvrzení transakce
+        
         $conn->commit();
 
         echo "New post and images assigned successfully!";
 
     } catch (Exception $e) {
-        // Zrušení transakce v případě chyby
+        
         $conn->rollback();
         echo "Error: " . $e->getMessage();
     }
@@ -90,6 +90,7 @@ if (isset($_POST['upload'])) {
     body{
             margin: 0;
             font-family: Arial, sans-serif;
+            background: linear-gradient(to bottom right, #add8e6, #00008b);
         }
 
         body.dark-mode{
@@ -97,6 +98,7 @@ if (isset($_POST['upload'])) {
             font-family: Arial, sans-serif;
             background-color: black;
             color: white;
+            background: linear-gradient(to bottom right, #4b0082, #800080, #8b008b);
         }
 
         .navbar{
@@ -113,6 +115,7 @@ if (isset($_POST['upload'])) {
 
         .navbar li a{
             display: block;
+            position: relative;
             color: white;
             text-align: center;
             padding: 28px 35px;
@@ -126,6 +129,7 @@ if (isset($_POST['upload'])) {
             position: relative;
             border-radius: 50%;
             margin-left: 30px;
+            object-fit: cover;
         }
 
         .sub-menu-wrap{
@@ -164,6 +168,7 @@ if (isset($_POST['upload'])) {
             height: 30px;
             border-radius: 50%;
             margin-right: 15px;
+            object-fit: cover;
         }
 
         .sub-menu hr{
@@ -202,13 +207,19 @@ if (isset($_POST['upload'])) {
 
 
     .template-container{
-        margin-top: 10%;
-        
-        margin-bottom: 20%;
-        
+        margin: 50px auto;
+        width: 60%;
+        border-radius: 30px;
+        background-color: white;
+        padding-top: 20px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
         
 
         
+    }
+
+    body.dark-mode .template-container{
+        background-color: #1a1a1a;
     }
 
     .items-container{
@@ -216,6 +227,7 @@ if (isset($_POST['upload'])) {
         flex-direction: column;
         align-items: center;
         justify-content: center;
+        
 
     }
 
@@ -251,7 +263,7 @@ if (isset($_POST['upload'])) {
     .image-container{
         display: flex;
         flex-wrap: wrap;
-        width: 600px;
+        width: 630px;
         min-height: 70px;
         max-height: 500px;
         
@@ -260,8 +272,9 @@ if (isset($_POST['upload'])) {
     }
 
     .image-preview{
-        height: 70px;
-        width: 150px;
+        height: 80px;
+        width: 80px;
+        object-fit: cover;
     }
 
     .tierlist-container {
@@ -300,6 +313,10 @@ if (isset($_POST['upload'])) {
         
     }
 
+    body.dark-mode .tier-content {
+        background-color: black;
+    }
+
     .tier-button {
         height: 100%;
         font-size: 30px;
@@ -336,8 +353,8 @@ if (isset($_POST['upload'])) {
         padding: 20px;
         border: 1px solid #888;
         border-radius: 10px;
-        width: 50%;
-        height: 50%;
+        width: 40%;
+        height: 25%;
     }
 
     .close {
@@ -382,6 +399,10 @@ if (isset($_POST['upload'])) {
         border-radius: 10px;
     }
 
+    body.dark-mode .add-btn{
+        background-color: black;
+    }
+
     .img-button{
         margin-top: 40px;
     }
@@ -396,9 +417,13 @@ if (isset($_POST['upload'])) {
         cursor: pointer;
     }
 
+    body.dark-mode .confirm-btn{
+        background-color: black;
+    }
+
     .confirm-btn.disabled-btn{
-        cursor: not-allowed; /* Změna kurzoru na not-allowed */
-        opacity: 0.2; /* Změna průhlednosti pro zatmavení */
+        cursor: not-allowed; 
+        opacity: 0.2; 
     }
 
     .desc{
@@ -420,6 +445,11 @@ if (isset($_POST['upload'])) {
         cursor: pointer;
     }
 
+    body.dark-mode .img-button{
+        background-color: #1a1a1a;
+        border-color: white;
+    }
+
     .img-button:hover {
         background-color: #e7e7e7;
     }
@@ -433,12 +463,12 @@ if (isset($_POST['upload'])) {
         align-items: center;
         justify-content: center;
         height: 200px;
-        width: 30%;
+        width: 400px;
         border: 2px dashed grey;
         border-radius: 10px;
         margin-bottom: 20px;
         overflow: hidden;
-        object-fit: cover;
+        position: relative;
     }
     
     .cover-container input{
@@ -447,6 +477,19 @@ if (isset($_POST['upload'])) {
         border: 1px dashed black;
         border-radius: 5px;
         cursor: pointer;
+    }
+
+    body.dark-mode .cover-container input{
+        background-color: #1a1a1a;
+        border-color: white;
+    }
+
+    body.dark-mode .navbar{
+        background-color: #1a1a1a;
+    }
+
+    body.dark-mode .sub-menu{
+        background-color:  #1a1a1a;
     }
 
     .cover-container input:hover{
@@ -462,10 +505,34 @@ if (isset($_POST['upload'])) {
     }
 
     .cover-preview{
-        
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        position: absolute;
+        z-index: 1;
     }
     
+    .navbar li .quiz-link{
+        padding: 10px 10px;
+        display: flex;
+        gap: 10px;
+        top: 17px;
+        background-color: #0574a1;
+        border-radius: 10px;
+        left: 15px;
+    }
+
+    .delete-btn{
+        width: 30%;
+        height: 50px;
+        background-color: #de5454;
+        border: none;
+        border-radius: 10px;
+        margin-top: 50px;
+        color: white;
+    }
     
+
 
 
 
@@ -489,10 +556,10 @@ if (isset($_POST['upload'])) {
                 }
             ?>
         </li>
-        <li><a href="myTemplates.php">My Templates</a></li>
         <li><a href="tierlists.php">Tier Lists</a></li>
         <li><a href="categories.php">Categories</a></li>
         <li style="float:left"><a style="padding: 0;" href="main.php"><img src="logoprostranku.png" alt="" width="150" height="70"></a></li>
+        <li style="float:left"><a class="quiz-link" href="quizMain.php">Switch to Quiz Page</a></li>
     </ul>
 
     <div class="sub-menu-wrap" id="subMenu">
@@ -506,10 +573,21 @@ if (isset($_POST['upload'])) {
                 <p>Edit Account</p>
                 <span>></span>
             </a>
+            <a href="myTemplates.php" class="sub-menu-link">
+                <p>My Templates</p>
+                <span>></span>
+            </a>
+            <?php if($_SESSION['user_type'] == 'admin'){?>
+                <a href="database.php" class="sub-menu-link">
+                    <p>Database</p>
+                    <span>></span>
+                </a>
+            <?php }?>
             <a href="logout.php" class="sub-menu-link">
                 <p>Logout</p>
                 <span>></span>
             </a>
+            
         </div>
     </div>
 
@@ -523,15 +601,16 @@ if (isset($_POST['upload'])) {
         
         <form action="" method="post" id="tierListForm" enctype="multipart/form-data">
             <div class="items-container" id="screenshot">
-                <input type="text" class="temp-name" name="tempName" placeholder="Name your template">
+                <h3>Tier List Title</h3>
+                <input type="text" class="temp-name" name="tempName" placeholder="Name your tier list..." required>
                 <div class="full-cover-container">
                     <h3>Cover Image</h3>
                     <div class="cover-container">
-                        <input type="file" id="coverInput" name="cover">
+                        <input type="file" id="coverInput" name="cover" required>
                     </div>
                 </div>
                 
-                
+                <h3>Select Category</h3>
                 <select name="theme" style="width: 50%; margin-bottom: 15px;">
                     <option value="music">Music</option>
                     <option value="cars">Cars</option>
@@ -542,7 +621,9 @@ if (isset($_POST['upload'])) {
                 </select>
                 <div class="tierlist-container">
                     <div class="tier">
-                        <div style="background-color: red;" class="tier-name"><input type="text" name="tiers[0][tier_name]" value="S"></div>
+                        <div style="background-color: red;" class="tier-name">
+                            <input type="text" name="tiers[0][tier_name]" value="S" required>
+                        </div>
                         <div class="tier-content"></div>
                         <button type="button" class="tier-button" id="editTier">⚙️</button>
                         <div id="colorPickerModal" class="modal">
@@ -559,11 +640,12 @@ if (isset($_POST['upload'])) {
                                     <div class="color-circle" style="background-color: pink;" data-color="pink"></div>
                                 </div>
                                 <input type="hidden" class="selected-color" name="tiers[0][color]" value="red">
+                                <button class="delete-btn">Delete this tier</button>
                             </div>
                         </div>
                     </div>
                     <div class="tier">
-                        <div style="background-color: orange;" class="tier-name"><input type="text" name="tiers[1][tier_name]" value="A"></div>
+                        <div style="background-color: orange;" class="tier-name"><input type="text" name="tiers[1][tier_name]" value="A" required></div>
                         <div class="tier-content"></div>
                         <button type="button" class="tier-button" id="editTier">⚙️</button>
                         <div id="colorPickerModal" class="modal">
@@ -580,11 +662,12 @@ if (isset($_POST['upload'])) {
                                     <div class="color-circle" style="background-color: pink;" data-color="pink"></div>
                                 </div>
                                 <input type="hidden" class="selected-color" name="tiers[1][color]" value="orange">
+                                <button class="delete-btn">Delete this tier</button>
                             </div>
                         </div>
                     </div>
                     <div class="tier">
-                        <div style="background-color: yellow;" class="tier-name"><input type="text" name="tiers[2][tier_name]" value="B"></div>
+                        <div style="background-color: yellow;" class="tier-name"><input type="text" name="tiers[2][tier_name]" value="B" required></div>
                         <div class="tier-content"></div>
                         <button type="button" class="tier-button" id="editTier">⚙️</button>
                         <div id="colorPickerModal" class="modal">
@@ -601,11 +684,12 @@ if (isset($_POST['upload'])) {
                                     <div class="color-circle" style="background-color: pink;" data-color="pink"></div>
                                 </div>
                                 <input type="hidden" class="selected-color" name="tiers[2][color]" value="yellow">
+                                <button class="delete-btn">Delete this tier</button>
                             </div>
                         </div>
                     </div>
                     <div class="tier">
-                        <div style="background-color: lightgreen;" class="tier-name"><input type="text" name="tiers[3][tier_name]" value="C"></div>
+                        <div style="background-color: lightgreen;" class="tier-name"><input type="text" name="tiers[3][tier_name]" value="C" required></div>
                         <div class="tier-content"></div>
                         <button type="button" class="tier-button" id="editTier">⚙️</button>
                         <div id="colorPickerModal" class="modal">
@@ -622,6 +706,7 @@ if (isset($_POST['upload'])) {
                                     <div class="color-circle" style="background-color: pink;" data-color="pink"></div>
                                 </div>
                                 <input type="hidden" class="selected-color" name="tiers[3][color]" value="lightgreen">
+                                <button class="delete-btn">Delete this tier</button>
                             </div>
                         </div>
                     </div>
@@ -632,7 +717,7 @@ if (isset($_POST['upload'])) {
                     
                 
 
-                <input type="file" id="fileInput" name="files[]" accept="image/*" class="img-button">
+                <input type="file" id="fileInput" name="files[]" accept="image/*" class="img-button" multiple required>
                 <div class="image-container" id="imageContainer"></div>
                 <button type="button" class="confirm-btn" id="submitButton">Confirm Images</button>
             </div>
@@ -668,14 +753,14 @@ if (isset($_POST['upload'])) {
             const previewContainer = document.getElementById('imageContainer');
             let filesArray = [];
 
-            // Přidání vybraných souborů do pole a zobrazení náhledů
+            
             fileInput.addEventListener('change', function(event) {
                 const selectedFiles = event.target.files;
                 for (let i = 0; i < selectedFiles.length; i++) {
                     const file = selectedFiles[i];
                     filesArray.push(file);
 
-                    // Vytvoření náhledu obrázku
+                    
                     const reader = new FileReader();
                     reader.onload = function(e) {
                         const img = document.createElement('img');
@@ -685,11 +770,11 @@ if (isset($_POST['upload'])) {
                     }
                     reader.readAsDataURL(file);
                 }
-                // Reset file input, aby bylo možné vybrat stejné soubory vícekrát
+                
                 fileInput.value = '';
             });
 
-            // Odeslání všech vybraných souborů do databáze
+            
             submitButton.addEventListener('click', function() {
                 if (filesArray.length > 0) {
                     const formData = new FormData();
@@ -704,9 +789,9 @@ if (isset($_POST['upload'])) {
                     .then(response => response.json())
                     .then(data => {
                         console.log('Success:', data);
-                        // Vyčistíme pole po úspěšném odeslání
+                        
                         filesArray = [];
-                        // Vymažeme náhledy
+                        
                         previewContainer.innerHTML = '';
                     })
                     .catch(error => {
@@ -733,17 +818,16 @@ if (isset($_POST['upload'])) {
                 const span = modal.querySelector('.close');
                 const colorCircles = modal.querySelectorAll('.color-circle');
                 const hiddenInput = modal.querySelector('.selected-color');
+                const deleteButton = modal.querySelector('.delete-btn');
                 const targetElement = tier.querySelector('.tier-name');
 
                 colorCircles.forEach(circle => {
                     circle.addEventListener('click', function() {
-                        // Odstraníme třídu 'selected' ze všech kruhů
+                        
                         colorCircles.forEach(c => c.classList.remove('selected'));
                         
-                        // Přidáme třídu 'selected' na kliknutý kruh
                         circle.classList.add('selected');
                         
-                        // Nastavíme hodnotu skrytého inputu na vybranou barvu
                         hiddenInput.value = circle.getAttribute('data-color');
 
                         targetElement.style.backgroundColor = hiddenInput.value;
@@ -754,6 +838,10 @@ if (isset($_POST['upload'])) {
 
                 btn.onclick = function() {
                     modal.style.display = "block";
+                }
+
+                deleteButton.onclick = function() {
+                    tier.remove();
                 }
 
                 span.onclick = function() {

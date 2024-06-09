@@ -3,7 +3,7 @@ session_start();
 
 $conn = mysqli_connect('localhost', 'root', '', 'mytierlist');
 
-$sql = "SELECT * FROM tierlists JOIN categories ON tierlists.tema = categories.id_cat";
+$sql = "SELECT * FROM tierlists JOIN categories ON tierlists.tema = categories.id_cat JOIN users ON tierlists.autor = users.id_user";
 $query = mysqli_query($conn, $sql);
 
 ?>
@@ -21,12 +21,16 @@ $query = mysqli_query($conn, $sql);
         body{
             margin: 0;
             font-family: Arial, sans-serif;
+            background: linear-gradient(to bottom right, #add8e6, #00008b);
+            height: 200vh;
+            background-size: cover;
+            
         }
 
         body.dark-mode{
             margin: 0;
             font-family: Arial, sans-serif;
-            background-color: black;
+            background: linear-gradient(to bottom right, #4b0082, #800080, #8b008b);
             color: white;
         }
         .navbar{
@@ -43,6 +47,7 @@ $query = mysqli_query($conn, $sql);
 
         .navbar li a{
             display: block;
+            position: relative;
             color: white;
             text-align: center;
             padding: 28px 35px;
@@ -56,6 +61,7 @@ $query = mysqli_query($conn, $sql);
             position: relative;
             border-radius: 50%;
             margin-left: 30px;
+            object-fit: cover;
         }
 
         .sub-menu-wrap{
@@ -94,6 +100,7 @@ $query = mysqli_query($conn, $sql);
             height: 30px;
             border-radius: 50%;
             margin-right: 15px;
+            object-fit: cover;
         }
 
         .sub-menu hr{
@@ -132,32 +139,110 @@ $query = mysqli_query($conn, $sql);
             flex-wrap: wrap;
             gap: 8px;
             margin: 10%;
+            position: absolute;
+            background-color: white;
+            width: 73.15%;
+            padding: 20px;
+            border-radius: 30px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+        }
 
+        body.dark-mode .tiers-container{
+            background-color: #1a1a1a;
         }
 
         .tierlist{
-            border: 1px solid #ccc;
-            box-sizing: border-box;
-            border-radius: 5px;
-            padding: 7px;
-
-            
-            
+            height: 200px;
+            width: 300px;
+            position: relative;
+            border: 1.5px solid black;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
         }
 
         .tierlist a{
+            width: 100%;
+            height: 100%;
             display: block;
-            color: white;
-            text-align: center;
-            padding: 10px 5px;
             text-decoration: none;
-            background-color: green;
-            border-radius: 5px;
+            color: white;
+            position: relative;
         }
 
-        .author{
-            font-size: 10px;
-            color: gray;
+        .cover-img{
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            position: absolute;
+        }
+
+        .cover-img img{
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .tier-name{
+            width: 100%;
+            height: 30%;
+            background-color: #1A1A1A;
+            position: absolute;
+            margin-top: 140px;
+            z-index: 2;
+            display: flex;
+            align-items: center;
+        }
+
+        body.dark-mode .tier-name{
+            background-color: black;
+        }
+
+        
+
+        .author-container{
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            margin-left: 10px;
+            overflow: hidden;
+        }
+
+        .author-container img{
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .tier-info{
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            margin-left: 10px;
+            flex-direction: column;
+            
+        }
+
+        .author-username{
+            font-size: 12px;
+        }
+
+        
+
+        body.dark-mode .navbar{
+            background-color: #1a1a1a;
+        }
+
+        body.dark-mode .sub-menu{
+            background-color:  #1a1a1a;
+        }
+
+        .navbar li .quiz-link{
+            padding: 10px 10px;
+            display: flex;
+            gap: 10px;
+            top: 17px;
+            background-color: #0574a1;
+            border-radius: 10px;
+            left: 15px;
         }
 
 
@@ -181,10 +266,10 @@ $query = mysqli_query($conn, $sql);
                 }
             ?>
         </li>
-        <li><a href="myTemplates.php">My Templates</a></li>
         <li><a href="tierlists.php">Tier Lists</a></li>
         <li><a href="categories.php">Categories</a></li>
         <li style="float:left"><a style="padding: 0;" href="main.php"><img src="logoprostranku.png" alt="" width="150" height="70"></a></li>
+        <li style="float:left"><a class="quiz-link" href="quizMain.php">Switch to Quiz Page</a></li>
     </ul>
 
     <div class="sub-menu-wrap" id="subMenu">
@@ -198,10 +283,21 @@ $query = mysqli_query($conn, $sql);
                 <p>Edit Account</p>
                 <span>></span>
             </a>
+            <a href="myTemplates.php" class="sub-menu-link">
+                <p>My Templates</p>
+                <span>></span>
+            </a>
+            <?php if($_SESSION['user_type'] == 'admin'){?>
+                <a href="database.php" class="sub-menu-link">
+                    <p>Database</p>
+                    <span>></span>
+                </a>
+            <?php }?>
             <a href="logout.php" class="sub-menu-link">
                 <p>Logout</p>
                 <span>></span>
             </a>
+            
         </div>
     </div>
 
@@ -209,12 +305,21 @@ $query = mysqli_query($conn, $sql);
         <?php foreach ($query as $q){?>
             <div class="tierlist">
                     
-                
-                <h4><?php echo $q['nazev']?></h4>
-                <h6><?php echo $q['nazevCat']?></h6>
-                <p class="author"><p class="author">Created by: </p><?php echo $q['autor']?></p>
-                <a href="viewlist.php?id=<?php echo $q['id_tier']?>">View tier list!</a>
-                
+                <a href="viewlist.php?id=<?php echo $q['id_tier']?>">
+                    <div class="cover-img">
+                        <img src="coverimgs/<?php echo $q['cover'];?>">
+                    </div>
+                    <div class="tier-name">
+                        <div class="author-container">
+                            <img src="profileimgs/<?php echo $q['image']?>" alt="">
+                        </div>
+                        <div class="tier-info">
+                            <span class="tier-title"><?php echo $q['nazev'];?></span>
+                            <span class="author-username"><?php echo $q['username'];?></span>
+                        </div>
+                        
+                    </div>
+                </a>
                     
             </div>
         <?php }?>

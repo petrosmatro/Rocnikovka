@@ -337,6 +337,7 @@ if(isset($_GET['player'])){
             position: relative;
             border-radius: 50%;
             margin-left: 30px;
+            object-fit: cover;
         }
 
         .sub-menu-wrap{
@@ -374,6 +375,7 @@ if(isset($_GET['player'])){
             height: 30px;
             border-radius: 50%;
             margin-right: 15px;
+            object-fit: cover;
         }
 
         .sub-menu hr{
@@ -440,6 +442,14 @@ if(isset($_GET['player'])){
             color: white;
         }
 
+        body.dark-mode .navbar{
+            background-color: #1a1a1a;
+        }
+
+        body.dark-mode .sub-menu{
+            background-color:  #1a1a1a;
+        }
+
     
     </style>
 </head>
@@ -460,10 +470,10 @@ if(isset($_GET['player'])){
                 }
             ?>
         </li>
-        <li><a href="myTemplates.php">My Templates</a></li>
         <li><a href="quizzes.php">Quizzes</a></li>
-        <li><a href="categories.php">Categories</a></li>
-        <li style="float:left"><a class="tier-link" href="main.php">Switch to Tier Lists Page <span>></span></a></li>
+        <li><a href="quizCategories.php">Categories</a></li>
+        <li style="float:left"><a style="padding: 0;" href="quizMain.php"><img src="quizSection.png" alt="" width="150" height="70"></a></li>
+        <li style="float:left"><a class="tier-link" href="main.php">Switch to Tier Lists Page</a></li>
     </ul>
 
     <div class="sub-menu-wrap" id="subMenu">
@@ -477,10 +487,21 @@ if(isset($_GET['player'])){
                 <p>Edit Account</p>
                 <span>></span>
             </a>
+            <a href="myTemplates.php" class="sub-menu-link">
+                <p>My Templates</p>
+                <span>></span>
+            </a>
+            <?php if($_SESSION['user_type'] == 'admin'){?>
+                <a href="database.php" class="sub-menu-link">
+                    <p>Database</p>
+                    <span>></span>
+                </a>
+            <?php }?>
             <a href="logout.php" class="sub-menu-link">
                 <p>Logout</p>
                 <span>></span>
             </a>
+            
         </div>
     </div>
 
@@ -569,38 +590,44 @@ if(isset($_GET['player'])){
     </div>
     
     <script>
+
+       let subMenu = document.getElementById('subMenu');
+        function toggleMenu(){
+            subMenu.classList.toggle('open-menu');
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
-  const progressCircle = document.querySelector('.circle-meter-progress');
-  const textElement = document.querySelector('.circle-meter-text');
+            const progressCircle = document.querySelector('.circle-meter-progress');
+            const textElement = document.querySelector('.circle-meter-text');
 
-  const radius = progressCircle.getAttribute('r');
-  const circumference = 2 * Math.PI * radius;
+            const radius = progressCircle.getAttribute('r');
+            const circumference = 2 * Math.PI * radius;
 
-  // Funkce pro aktualizaci kruhového měřiče
-  function updateCircle(progress) {
-    const percent = Math.min(progress, 100); // Omezíme procenta na maximálně 100
+            // Funkce pro aktualizaci kruhového měřiče
+            function updateCircle(progress) {
+                const percent = Math.min(progress, 100); // Omezíme procenta na maximálně 100
 
-    const dashOffset = circumference - (percent / 100) * circumference;
-    progressCircle.style.strokeDashoffset = dashOffset;
+                const dashOffset = circumference - (percent / 100) * circumference;
+                progressCircle.style.strokeDashoffset = dashOffset;
 
-    textElement.textContent = `${Math.round(percent)}%`;
-    textElement.style.opacity = 1;
-  }
+                textElement.textContent = `${Math.round(percent)}%`;
+                textElement.style.opacity = 1;
+            }
 
-  // Animace načítání kruhu
-  let currentProgress = 0;
-  const targetProgress = <?php echo $accuracy;?>; // Cílové procento
+            // Animace načítání kruhu
+            let currentProgress = 0;
+            const targetProgress = <?php echo $accuracy;?>; // Cílové procento
 
-  const animationInterval = setInterval(() => {
-    updateCircle(currentProgress);
+            const animationInterval = setInterval(() => {
+                updateCircle(currentProgress);
 
-    if (currentProgress >= targetProgress) {
-      clearInterval(animationInterval); // Zastavíme animaci, když dosáhneme cílového procenta
-    }
+                if (currentProgress >= targetProgress) {
+                clearInterval(animationInterval); // Zastavíme animaci, když dosáhneme cílového procenta
+                }
 
-    currentProgress += 1; // Inkrementujeme procenta
-  }, 10); // Interval animace (čím menší, tím plynulejší)
-});
+                currentProgress += 1; // Inkrementujeme procenta
+            }, 10); // Interval animace (čím menší, tím plynulejší)
+        });
 
     document.querySelector('.questions').style.display = 'none';
     let isToggled = false;

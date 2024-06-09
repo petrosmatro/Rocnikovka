@@ -59,7 +59,62 @@ if(isset($_POST['submit'])){
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
-    <link rel="stylesheet" href="style.css">
+    <style>
+
+        body{
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: linear-gradient(to bottom right, #add8e6, #00008b);
+            height: 100vh;
+        }
+
+        .register-container {
+            width: 300px;
+            margin: 0 auto;
+            padding: 20px;
+            border: 1px solid #ccc;
+            margin-top: 50px;
+            border-radius: 5px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+            background-color: white;
+        }
+
+        .register-container h2 {
+            text-align: center;
+        }
+
+        .register-container input[type="text"],
+        .register-container input[type="email"],
+        .register-container input[type="password"] {
+            width: 100%;
+            padding: 10px;
+            margin: 5px 0 20px 0;
+            display: inline-block;
+            border: 1px solid #ccc;
+            box-sizing: border-box;
+            border-radius: 5px;
+        }
+
+        .register-container button {
+            background-color: #5291f7;
+            color: white;
+            padding: 14px 20px;
+            margin: 8px 0;
+            border: none;
+            cursor: pointer;
+            width: 100%;
+            border-radius: 20px;
+        }
+        .register-container button:hover {
+            opacity: 0.8;
+        }
+
+        .error-msg{
+            color: red;
+            font-size: small;
+            margin-top: -6px;
+        }
+    </style>
 </head>
 <body>
     <div class="register-container">

@@ -26,6 +26,7 @@ $randQuizzes = mysqli_query($conn, 'SELECT * FROM quizzes JOIN users ON quizzes.
     body{
             margin: 0;
             font-family: Arial, sans-serif;
+            background: linear-gradient(to bottom right, #add8e6, #00008b);
         }
 
         body.dark-mode{
@@ -33,6 +34,7 @@ $randQuizzes = mysqli_query($conn, 'SELECT * FROM quizzes JOIN users ON quizzes.
             font-family: Arial, sans-serif;
             background-color: black;
             color: white;
+            background: linear-gradient(to bottom right, #4b0082, #800080, #8b008b);
         }
 
         .navbar{
@@ -82,6 +84,7 @@ $randQuizzes = mysqli_query($conn, 'SELECT * FROM quizzes JOIN users ON quizzes.
             position: relative;
             border-radius: 50%;
             margin-left: 30px;
+            object-fit: cover;
         }
 
         .main-text{
@@ -89,6 +92,14 @@ $randQuizzes = mysqli_query($conn, 'SELECT * FROM quizzes JOIN users ON quizzes.
             margin-top: 10%;
             margin-left: 20%;
             margin-right: 20%;
+            border-radius: 30px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+            background-color: white;
+            padding: 20px;
+        }
+
+        body.dark-mode .main-text{
+            background-color: #1a1a1a;
         }
 
         .main-text button{
@@ -96,7 +107,8 @@ $randQuizzes = mysqli_query($conn, 'SELECT * FROM quizzes JOIN users ON quizzes.
             text-align: center;
             padding: 20px;
             background-color: #0574a1;
-            border-radius: 8px;
+            border: none;
+            border-radius: 20px;
         }
 
         .error-msg{
@@ -140,6 +152,7 @@ $randQuizzes = mysqli_query($conn, 'SELECT * FROM quizzes JOIN users ON quizzes.
             height: 30px;
             border-radius: 50%;
             margin-right: 15px;
+            object-fit: cover;
         }
 
         .sub-menu hr{
@@ -174,51 +187,146 @@ $randQuizzes = mysqli_query($conn, 'SELECT * FROM quizzes JOIN users ON quizzes.
         }
 
         .quiz{
+            border-radius: 7px;
+            width: 300px;
+            height: 260px;
+            cursor: pointer;
+            overflow: hidden;
             display: inline-block;
-            width: 200px;
-            height: 150px;
-            color: white;
-            text-align: center;
-            line-height: 150px;
-            font-size: 24px;
-            border-radius: 10px;
-            
-            
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+            position: relative;
         }
 
         .quiz a{
-            width: 100%;
-            display: block;
             text-decoration: none;
-            color: black;
+            color: white;
         }
 
-        .quiz a .quiz-card-image{
-            width: 300px;
-            height: 180px;
+        .cover-container{
+            width: 100%;
+            height: 65%;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cover-container a{
+            width: 100%;
+            height: 100%;
+            text-decoration: none;
+            position: absolute;
+        }
+
+        .quiz-card-image{
+            width: 100%;
+            height: 100%;
             object-fit: cover;
-            border-radius: 10px;
-            transition: transform 0.5s;
+            position: absolute;
+            transition: transform 0.6s ease;
         }
 
-        .quiz a .quiz-card-image:hover{
-            transform: scale(0.9)
+        .cover-container a .quiz-card-image:hover{
+            transform: scale(1.1);
+        }
+
+        .quiz-info{
+            width: 100%;
+            height: 35%;
+            background-color: black;
+            position: absolute;
+        }
+
+        .quiz-info a{
+            font-weight: bold;
+        }
+
+        body.dark-mode .quiz-info{
+            background-color: #1a1a1a;
+        }
+
+        .author-info{
+            width: 100%;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            gap: 10px;
+            margin-top: -10px;
+        }
+
+        .author-info img{
+            object-fit: cover;
+            width: 30px;
+            height: 30px;
+            margin-left: 10px;
+            border-radius: 50%;
+            
+        }
+
+        .quiz-card-title{
+            margin-left: 10px;
+        }
+        
+
+        .quiz-author{
+            font-size: small;
+            color: grey;
         }
 
         
 
-        .scroll-container {
-            width: 80%;
-            overflow-x: scroll;
+        .scrollable-container {
+            overflow-x: auto;
             white-space: nowrap;
-            border: 1px solid #ccc;
-            padding: 10px;
             background-color: #fff;
+            border: 1px solid black;
+            width: 1000px;
         }
 
-        .scroll-content {
+        body.dark-mode .scrollable-container {
+            background-color: #1a1a1a;
+        }
+
+        
+
+        .scrollable-content {
+            display: inline-block;
+        }
+
+        .random-container{
+            width: 100%;
+            
             display: flex;
-            gap: 20px;
+            align-items: center;
+            flex-direction: column;
+        }
+
+        .random-title{
+           
+        }
+
+        .random-quizzes{
+            padding-left: 20px;
+            padding-right: 20px;
+            padding-top: 10px;
+            width: 1000px;
+            border-radius: 30px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+            background-color: white;
+            margin-left: 130px;
+            margin-top: 40px;
+            overflow: hidden;
+            padding-bottom: 20px;
+        }
+
+        body.dark-mode .random-quizzes{
+            background-color: #1a1a1a;
+        }
+
+        body.dark-mode .navbar{
+            background-color: #1a1a1a;
+        }
+
+        body.dark-mode .sub-menu{
+            background-color:  #1a1a1a;
         }
 
         
@@ -243,10 +351,10 @@ $randQuizzes = mysqli_query($conn, 'SELECT * FROM quizzes JOIN users ON quizzes.
                 }
             ?>
         </li>
-        <li><a href="myTemplates.php">My Templates</a></li>
         <li><a href="quizzes.php">Quizzes</a></li>
-        <li><a href="categories.php">Categories</a></li>
-        <li style="float:left"><a class="tier-link" href="main.php">Switch to Tier Lists Page <span>></span></a></li>
+        <li><a href="quizCategories.php">Categories</a></li>
+        <li style="float:left"><a style="padding: 0;" href="quizMain.php"><img src="quizSection.png" alt="" width="150" height="70"></a></li>
+        <li style="float:left"><a class="tier-link" href="main.php">Switch to Tier Lists Page</a></li>
     </ul>
 
     <div class="sub-menu-wrap" id="subMenu">
@@ -260,10 +368,21 @@ $randQuizzes = mysqli_query($conn, 'SELECT * FROM quizzes JOIN users ON quizzes.
                 <p>Edit Account</p>
                 <span>></span>
             </a>
+            <a href="myTemplates.php" class="sub-menu-link">
+                <p>My Templates</p>
+                <span>></span>
+            </a>
+            <?php if($_SESSION['user_type'] == 'admin'){?>
+                <a href="database.php" class="sub-menu-link">
+                    <p>Database</p>
+                    <span>></span>
+                </a>
+            <?php }?>
             <a href="logout.php" class="sub-menu-link">
                 <p>Logout</p>
                 <span>></span>
             </a>
+            
         </div>
     </div>
    
@@ -283,25 +402,42 @@ $randQuizzes = mysqli_query($conn, 'SELECT * FROM quizzes JOIN users ON quizzes.
     </form>
 
 
-    <div class="scroll-container">
-        <div class="scroll-content">
-            <?php foreach($randQuizzes as $rq){?>
+    <div class="random-quizzes">
+    <h2 class="random-title">Random Quizzes</h2>
+    <div class="random-container">
+        
+        <div class="scrollable-container">
+            <div class="scrollable-content">
+                <?php foreach($randQuizzes as $rq){?>
                 <div class="quiz">
 
-                    <a href="viewquiz.php?id=<?php echo $rq['id_quiz']?>"> 
-                        <img class="quiz-card-image" src="coverimgs/<?php echo $rq['cover']?>" alt="">
-                    </a>
+                    <div class="cover-container">
+                        <a href="viewquiz.php?id=<?php echo $rq['id_quiz']?>"> 
+                            <img class="quiz-card-image" src="coverimgs/<?php echo $rq['cover']?>" alt="">
+                        </a>
+                    </div>
 
-                    <a href="viewquiz.php?id=<?php echo $rq['id_quiz']?>">
-                        <p class="quiz-card-title"><?php echo $rq['quiz_name']?></p>
-                    </a>
+                    <div class="quiz-info">
+                        <a href="viewquiz.php?id=<?php echo $rq['id_quiz']?>">
+                            <p class="quiz-card-title"><?php echo $rq['quiz_name']?></p>
+                        </a>
 
-                    <p class="quiz-author">By <?php echo $rq['username']?></p>
+                        <div class="author-info">
+                            <img src="profileimgs/<?php echo $rq['image'];?>" alt="">
+                            <p class="quiz-author"><?php echo $rq['username']?></p>
+                        </div>
+                        
+                    </div>
+                
+
+                
                 
                     
                 </div>
-            <?php }?>
+                <?php }?>
+            </div>
         </div>
+    </div>
     </div>
 
     

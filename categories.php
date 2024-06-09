@@ -20,6 +20,8 @@ $query = mysqli_query($conn, $sql);
         body{
             margin: 0;
             font-family: Arial, sans-serif;
+            background: linear-gradient(to bottom right, #add8e6, #00008b);
+            height: 100vh;
         }
 
         body.dark-mode{
@@ -27,6 +29,7 @@ $query = mysqli_query($conn, $sql);
             font-family: Arial, sans-serif;
             background-color: black;
             color: white;
+            background: linear-gradient(to bottom right, #4b0082, #800080, #8b008b);
         }
 
         .navbar{
@@ -43,6 +46,7 @@ $query = mysqli_query($conn, $sql);
 
         .navbar li a{
             display: block;
+            position: relative;
             color: white;
             text-align: center;
             padding: 28px 35px;
@@ -61,6 +65,7 @@ $query = mysqli_query($conn, $sql);
             position: relative;
             border-radius: 50%;
             margin-left: 30px;
+            object-fit: cover;
         }
 
         .sub-menu-wrap{
@@ -99,6 +104,7 @@ $query = mysqli_query($conn, $sql);
             height: 30px;
             border-radius: 50%;
             margin-right: 15px;
+            object-fit: cover;
         }
 
         .sub-menu hr{
@@ -136,6 +142,7 @@ $query = mysqli_query($conn, $sql);
             padding: 50px 100px;
             text-decoration: none;
             color: white;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
             
             background-size: cover;
             text-align: center;
@@ -192,6 +199,16 @@ $query = mysqli_query($conn, $sql);
         body.dark-mode .sub-menu{
             background-color:  #1a1a1a;
         }
+
+        .navbar li .quiz-link{
+            padding: 10px 10px;
+            display: flex;
+            gap: 10px;
+            top: 17px;
+            background-color: #0574a1;
+            border-radius: 10px;
+            left: 15px;
+        }
         
 
         
@@ -224,10 +241,10 @@ $query = mysqli_query($conn, $sql);
                 }
             ?>
         </li>
-        <li><a href="myTemplates.php">My Templates</a></li>
         <li><a href="tierlists.php">Tier Lists</a></li>
         <li><a href="categories.php">Categories</a></li>
         <li style="float:left"><a style="padding: 0;" href="main.php"><img src="logoprostranku.png" alt="" width="150" height="70"></a></li>
+        <li style="float:left"><a class="quiz-link" href="quizMain.php">Switch to Quiz Page</a></li>
     </ul>
 
     <div class="sub-menu-wrap" id="subMenu">
@@ -241,10 +258,21 @@ $query = mysqli_query($conn, $sql);
                 <p>Edit Account</p>
                 <span>></span>
             </a>
+            <a href="myTemplates.php" class="sub-menu-link">
+                <p>My Templates</p>
+                <span>></span>
+            </a>
+            <?php if($_SESSION['user_type'] == 'admin'){?>
+                <a href="database.php" class="sub-menu-link">
+                    <p>Database</p>
+                    <span>></span>
+                </a>
+            <?php }?>
             <a href="logout.php" class="sub-menu-link">
                 <p>Logout</p>
                 <span>></span>
             </a>
+            
         </div>
     </div>
     

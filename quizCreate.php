@@ -59,9 +59,14 @@ if(isset($_POST['submit'])){
             width: 600px;
             margin: 0 auto;
             padding: 20px;
-            border: 1px solid #ccc;
             margin-top: 50px;
             border-radius: 5px;
+            background-color: white;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+        }
+
+        body.dark-mode .overview-container{
+            background-color: #1a1a1a;
         }
 
         .overview-container input{
@@ -77,12 +82,16 @@ if(isset($_POST['submit'])){
             border-radius: 7px;
             text-decoration: none;
             text-align: center;
-
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         body{
             margin: 0;
             font-family: Arial, sans-serif;
+            background: linear-gradient(to bottom right, #add8e6, #00008b);
+            height: 200vh;
         }
 
         body.dark-mode{
@@ -90,6 +99,15 @@ if(isset($_POST['submit'])){
             font-family: Arial, sans-serif;
             background-color: black;
             color: white;
+            background: linear-gradient(to bottom right, #4b0082, #800080, #8b008b);
+        }
+
+        body.dark-mode .navbar{
+            background-color: #1a1a1a;
+        }
+
+        body.dark-mode .sub-menu{
+            background-color:  #1a1a1a;
         }
 
         .navbar{
@@ -139,6 +157,7 @@ if(isset($_POST['submit'])){
             position: relative;
             border-radius: 50%;
             margin-left: 30px;
+            object-fit: cover;
         }
 
         .main-text{
@@ -197,6 +216,7 @@ if(isset($_POST['submit'])){
             height: 30px;
             border-radius: 50%;
             margin-right: 15px;
+            object-fit: cover;
         }
 
         .sub-menu hr{
@@ -230,6 +250,67 @@ if(isset($_POST['submit'])){
             font-weight: 600;
         }
 
+        .cover-container{
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 200px;
+            width: 400px;
+            border: 2px dashed grey;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .cover-container input{
+            padding: 10px;
+            background-color: #f7f7f7;
+            border: 1px dashed black;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 300px;
+        }
+
+        body.dark-mode .cover-container input{
+            background-color: #1a1a1a;
+            border-color: white;
+        }
+
+        .cover-container input:hover{
+            background-color: #e7e7e7;
+        }
+
+        select {
+            width: 200px;
+            padding: 5px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            background-color: #f9f9f9;
+            color: #333;
+        }
+
+        select option {
+            background-color: #fff;
+            color: #333;
+            padding: 10px;
+        }
+
+        
+        select option:checked {
+            background-color: #007BFF;
+            color: #fff;
+        }
+
+        .cover-preview{
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            position: absolute;
+            z-index: 1;
+        }
+
 
     </style>
 </head>
@@ -250,10 +331,10 @@ if(isset($_POST['submit'])){
                 }
             ?>
         </li>
-        <li><a href="myTemplates.php">My Templates</a></li>
         <li><a href="quizzes.php">Quizzes</a></li>
-        <li><a href="categories.php">Categories</a></li>
-        <li style="float:left"><a class="tier-link" href="main.php">Switch to Tier Lists Page <span>></span></a></li>
+        <li><a href="quizCategories.php">Categories</a></li>
+        <li style="float:left"><a style="padding: 0;" href="quizMain.php"><img src="quizSection.png" alt="" width="150" height="70"></a></li>
+        <li style="float:left"><a class="tier-link" href="main.php">Switch to Tier Lists Page</a></li>
     </ul>
 
     <div class="sub-menu-wrap" id="subMenu">
@@ -267,10 +348,21 @@ if(isset($_POST['submit'])){
                 <p>Edit Account</p>
                 <span>></span>
             </a>
+            <a href="myTemplates.php" class="sub-menu-link">
+                <p>My Templates</p>
+                <span>></span>
+            </a>
+            <?php if($_SESSION['user_type'] == 'admin'){?>
+                <a href="database.php" class="sub-menu-link">
+                    <p>Database</p>
+                    <span>></span>
+                </a>
+            <?php }?>
             <a href="logout.php" class="sub-menu-link">
                 <p>Logout</p>
                 <span>></span>
             </a>
+            
         </div>
     </div>
 
@@ -281,8 +373,12 @@ if(isset($_POST['submit'])){
             <label for="title">Title</label>
             <input type="text" name="title" required>
 
-            <label for="fileImg">Cover for your Quiz</label>
-            <input type="file" name="fileImg" id="fileImg" accept=".jpg, .jpeg, .png">
+            <h3>Cover Image</h3>
+                    <div class="cover-container">
+                        <input type="file" name="fileImg" id="fileImg" accept=".jpg, .jpeg, .png" required>
+                    </div>
+            
+            
 
             <label for="category">Select Category</label>
             <select name="category" id="category">
@@ -299,6 +395,13 @@ if(isset($_POST['submit'])){
     </div>
 
     <script>
+
+        let subMenu = document.getElementById('subMenu');
+
+        function toggleMenu(){
+            subMenu.classList.toggle('open-menu');
+        }
+
         document.addEventListener('DOMContentLoaded', (event) => {
             const toggle = document.getElementById('darkModeToggle');
 
@@ -318,6 +421,20 @@ if(isset($_POST['submit'])){
                     localStorage.setItem('darkMode', 'disabled');
                 }
             });
+        });
+
+        document.getElementById("fileImg").addEventListener('change', function(event){
+            const coverContainer = document.querySelector(".cover-container");
+            var file = document.getElementById("fileImg").files[0];
+
+            const reader = new FileReader();
+            reader.onload = function(e){
+                const img = document.createElement("img");
+                img.src = e.target.result;
+                img.classList.add("cover-preview");
+                coverContainer.appendChild(img);
+            }
+            reader.readAsDataURL(file);
         });
     </script>
 </body>

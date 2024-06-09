@@ -86,6 +86,7 @@
         body{
             margin: 0;
             font-family: Arial, sans-serif;
+            background: linear-gradient(to bottom right, #add8e6, #00008b);
         }
 
         body.dark-mode{
@@ -93,16 +94,29 @@
             font-family: Arial, sans-serif;
             background-color: black;
             color: white;
+            background: linear-gradient(to bottom right, #4b0082, #800080, #8b008b);
         }
 
         .question {
-            width: 50%;
-            margin: 50px auto;
+            width: 100%;
+            margin-top: 30px;
+        }
+
+        .delete-btn{
+            background-color: red;
+            color: white;
+            border-radius: 20px;
+            border: none;
         }
 
         .question-text {
+            width: 100%;
             font-size: 20px;
             margin-bottom: 20px;
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            gap: 200px;
         }
 
         .file-upload {
@@ -116,6 +130,10 @@
             border-radius: 10px;
             overflow: hidden;
             flex-direction: column;
+        }
+
+        body.dark-mode .file-upload{
+            border-color: #545454;
         }
 
         .answers {
@@ -177,6 +195,20 @@
             border-radius: 20px;
         }
 
+        body.dark-mode .btns-container button{
+            background-color: #1a1a1a;
+        }
+
+        body.dark-mode .add-btn:hover{
+            background-color: #1e6696;
+            color: #1a1a1a;
+        }
+
+        body.dark-mode .upload-btn:hover{
+            background-color: #e622c5;
+            color: #1a1a1a;
+        }
+
         .add-btn:hover{
             color: white;
             background-color: #1e6696;
@@ -199,8 +231,8 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-bottom: 40px;
-            margin-top: -20px;
+            
+            
             gap: 20px;
         }
         
@@ -209,6 +241,7 @@
             border: none;
             border-radius: 10px;
             padding: 10px;
+            width: 50%;
         }
 
         
@@ -260,6 +293,7 @@
             position: relative;
             border-radius: 50%;
             margin-left: 30px;
+            object-fit: cover;
         }
 
         .main-text{
@@ -318,6 +352,7 @@
             height: 30px;
             border-radius: 50%;
             margin-right: 15px;
+            object-fit: cover;
         }
 
         .sub-menu hr{
@@ -352,18 +387,42 @@
         }
 
         input[type="file"] {
-    /* Příklad vlastních stylů */
-    padding: 10px;
-    background-color: #f7f7f7;
-    border: 1px dashed black;
-    border-radius: 5px;
-    cursor: pointer;
-}
+            padding: 10px;
+            background-color: #f7f7f7;
+            border: 1px dashed black;
+            border-radius: 5px;
+            cursor: pointer;
+        }
 
-input[type="file"]:hover {
-    background-color: #e7e7e7;
-}
+        body.dark-mode input[type="file"] {
+            background-color: #545454;
+            border-color: #a3a3a3;
+        }
 
+        input[type="file"]:hover {
+            background-color: #e7e7e7;
+        }
+
+        body.dark-mode .navbar{
+            background-color: #1a1a1a;
+        }
+
+        body.dark-mode .sub-menu{
+            background-color:  #1a1a1a;
+        }
+
+        .questions-container{
+            background-color: white;
+            padding: 20px;
+            border-radius: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+            width: 50%;
+            margin: 50px auto;
+        }
+
+        body.dark-mode .questions-container{
+            background-color: #1a1a1a;
+        }
         
         
 
@@ -386,10 +445,10 @@ input[type="file"]:hover {
                 }
             ?>
         </li>
-        <li><a href="myTemplates.php">My Templates</a></li>
         <li><a href="quizzes.php">Quizzes</a></li>
-        <li><a href="categories.php">Categories</a></li>
-        <li style="float:left"><a class="tier-link" href="main.php">Switch to Tier Lists Page <span>></span></a></li>
+        <li><a href="quizCategories.php">Categories</a></li>
+        <li style="float:left"><a style="padding: 0;" href="quizMain.php"><img src="quizSection.png" alt="" width="150" height="70"></a></li>
+        <li style="float:left"><a class="tier-link" href="main.php">Switch to Tier Lists Page</a></li>
     </ul>
 
     <div class="sub-menu-wrap" id="subMenu">
@@ -403,39 +462,68 @@ input[type="file"]:hover {
                 <p>Edit Account</p>
                 <span>></span>
             </a>
+            <a href="myTemplates.php" class="sub-menu-link">
+                <p>My Templates</p>
+                <span>></span>
+            </a>
+            <?php if($_SESSION['user_type'] == 'admin'){?>
+                <a href="database.php" class="sub-menu-link">
+                    <p>Database</p>
+                    <span>></span>
+                </a>
+            <?php }?>
             <a href="logout.php" class="sub-menu-link">
                 <p>Logout</p>
                 <span>></span>
             </a>
+            
         </div>
     </div>
 
+    <div class="questions-container">
+        <form action="" method="post" id="quizForm" enctype="multipart/form-data">
+            <div class="question" id="question">
+                <div class="question-text">
+                    <input type="text" name="questions[0][question]" placeholder="Question:" required>
+                    <button type="button" style="visibility: hidden;" class="delete-btn">Delete question</button>
+                </div>
 
-    <form action="" method="post" id="quizForm" enctype="multipart/form-data">
-        <div class="question" id="question">
-            <div class="question-text"><input type="text" name="questions[0][question]" placeholder="Question:"></div>
+                <div class="file-upload" id="file-upload">
+                    <input type="file" id="questionImage" name="questions[0][questionImage]" accept=".jpg, .jpeg, .png" required>
+                </div>
 
-            <div class="file-upload" id="file-upload">
-                <input type="file" id="questionImage" name="questions[0][questionImage]" accept=".jpg, .jpeg, .png">
+                <div class="answers">
+                    <div class="answer" style="border-color: red;">
+                        <div class="answer-word" style="background-color: red;">A</div>
+                        <span>
+                            <input name="questions[0][optionA]" type="text" placeholder="Option A..." required>
+                        </span>
+                        <input type="checkbox" name="questions[0][answerCheckA]" id="">
+                    </div>
+                    <div class="answer" style="border-color: blue;"><div class="answer-word" style="background-color: blue;">B</div><span><input name="questions[0][optionB]" type="text" placeholder="Option B..." required></span><input type="checkbox" name="questions[0][answerCheckB]" id=""></div>
+                    <div class="answer" style="border-color: #f2e01b;"><div class="answer-word" style="background-color: #f2e01b;">C</div><span><input name="questions[0][optionC]" type="text" placeholder="Option C..." required></span><input type="checkbox" name="questions[0][answerCheckC]" id=""></div>
+                    <div class="answer" style="border-color: green;"><div class="answer-word" style="background-color: green">D</div><span><input name="questions[0][optionD]" type="text" placeholder="Option D..." required></span><input type="checkbox" name="questions[0][answerCheckD]" id=""></div>
+                </div>
+                
             </div>
 
-            <div class="answers">
-                <div class="answer" style="border-color: red;"><div class="answer-word" style="background-color: red;">A</div><span><input name="questions[0][optionA]" type="text" placeholder="Option A..."></span><input type="checkbox" name="questions[0][answerCheckA]" id=""></div>
-                <div class="answer" style="border-color: blue;"><div class="answer-word" style="background-color: blue;">B</div><span><input name="questions[0][optionB]" type="text" placeholder="Option B..."></span><input type="checkbox" name="questions[0][answerCheckB]" id=""></div>
-                <div class="answer" style="border-color: #f2e01b;"><div class="answer-word" style="background-color: #f2e01b;">C</div><span><input name="questions[0][optionC]" type="text" placeholder="Option C..."></span><input type="checkbox" name="questions[0][answerCheckC]" id=""></div>
-                <div class="answer" style="border-color: green;"><div class="answer-word" style="background-color: green">D</div><span><input name="questions[0][optionD]" type="text" placeholder="Option D..."></span><input type="checkbox" name="questions[0][answerCheckD]" id=""></div>
+            <div class="btns-container">
+                    <button name="upload" class="upload-btn">Upload Quiz</button>
+                    <button type="button" class="add-btn">Add Question</button>
             </div>
-            
-        </div>
-
-        <div class="btns-container">
-                <button name="upload" class="upload-btn">Upload Quiz</button>
-                <button type="button" class="add-btn">Add Question</button>
-        </div>
-    </form>
+        </form>
+    </div>
+    
 
 
     <script>
+        let subMenu = document.getElementById('subMenu');
+        function toggleMenu(){
+            subMenu.classList.toggle('open-menu');
+        }
+
+        
+
         quizForm.addEventListener('change', function(event) {
         if (event.target && event.target.matches('input[type="file"]')) {
             var fileInput = event.target;
@@ -459,7 +547,7 @@ input[type="file"]:hover {
         document.addEventListener('DOMContentLoaded', function () {
             const addButton = document.querySelector('.add-btn');
             const quizForm = document.getElementById('quizForm');
-            let questionIndex = 0;
+            let questionIndex = document.querySelectorAll('.question').length - 1;
 
             addButton.addEventListener('click', function () {
                 const questionContainer = document.querySelector('.question').cloneNode(true);
@@ -471,6 +559,8 @@ input[type="file"]:hover {
 
                 
 
+                const deleteBtn = questionContainer.querySelector('.delete-btn');
+                deleteBtn.style.visibility = 'visible';
                 resetQuestionFields(questionContainer);
 
                 questionIndex++;
@@ -479,7 +569,30 @@ input[type="file"]:hover {
 
                 quizForm.insertBefore(questionContainer, addButton.parentNode);
             });
+
+            quizForm.addEventListener('click', function (event) {
+                if (event.target && event.target.classList.contains('delete-btn')) {
+                    event.preventDefault();
+                    deleteQuestion(event.target);
+                }
+            });
+
+            function deleteQuestion(button){
+                var container = button.parentElement;
+                var question = container.parentElement;
+
+                question.remove();
+                questionIndex--;
+                reindexQuestions();
+            }
         });
+
+        function reindexQuestions() {
+            const questions = document.querySelectorAll('.question');
+            questions.forEach((question, index) => {
+                updateAttributeIndexes(question, index);
+            });
+        }
 
 
         function resetQuestionFields(questionContainer) {

@@ -49,13 +49,16 @@ if(isset($_POST['saveChanges'])){
             margin: 0;
             font-family: Arial, sans-serif;
             transition: background-color 0.5s ease, color 0.5s ease;
+            background: linear-gradient(to bottom right, #add8e6, #00008b);
+            height: 100vh;
         }
 
         body.dark-mode{
             margin-top: 0;
             font-family: Arial, sans-serif;
-            background-color: black;
             color: white;
+            height: 100vh;
+            background: linear-gradient(to bottom right, #4b0082, #800080, #8b008b);
         }
 
         .navbar{
@@ -85,6 +88,7 @@ if(isset($_POST['saveChanges'])){
             position: relative;
             border-radius: 50%;
             margin-left: 30px;
+            object-fit: cover;
         }
 
         .sub-menu-wrap{
@@ -123,6 +127,7 @@ if(isset($_POST['saveChanges'])){
             height: 30px;
             border-radius: 50%;
             margin-right: 15px;
+            object-fit: cover;
         }
 
         .navbar a:hover {
@@ -169,6 +174,7 @@ if(isset($_POST['saveChanges'])){
             margin-right: auto;
             border-radius: 50%;
             border: 2px solid green;
+            object-fit: cover;
             
         }
 
@@ -179,6 +185,8 @@ if(isset($_POST['saveChanges'])){
             border: 1px solid #ccc;
             margin-top: 50px;
             border-radius: 5px;
+            background-color: white;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
         }
 
         .edit-account input[type="text"],
@@ -315,7 +323,6 @@ body.dark-mode .navbar{
                 }
             ?>
         </li>
-        <li><a href="myTemplates.php">My Templates</a></li>
         <li><a href="tierlists.php">Tier Lists</a></li>
         <li><a href="categories.php">Categories</a></li>
         <li style="float:left"><a style="padding: 0;" href="main.php"><img src="logoprostranku.png" alt="" width="150" height="70"></a></li>
@@ -324,7 +331,7 @@ body.dark-mode .navbar{
     <div class="sub-menu-wrap" id="subMenu">
         <div class="sub-menu">
             <div class="user-info">
-                <?php echo "<img src='profileimgs/$image'>"; ?>
+                <?php echo "<img src='profileimgs/$image'>" ?>
                 <?php echo "<h3>".$username."</h3>"; ?>
             </div>
             <hr>
@@ -332,10 +339,21 @@ body.dark-mode .navbar{
                 <p>Edit Account</p>
                 <span>></span>
             </a>
+            <a href="myTemplates.php" class="sub-menu-link">
+                <p>My Templates</p>
+                <span>></span>
+            </a>
+            <?php if($_SESSION['user_type'] == 'admin'){?>
+                <a href="database.php" class="sub-menu-link">
+                    <p>Database</p>
+                    <span>></span>
+                </a>
+            <?php }?>
             <a href="logout.php" class="sub-menu-link">
                 <p>Logout</p>
                 <span>></span>
             </a>
+            
         </div>
     </div>
     <div class="edit-account">
